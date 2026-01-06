@@ -62,7 +62,7 @@ HelloTraveller/
 
 ## 👥 팀 정보
 
-구름 딥다이브 팀미션 B2팀
+구름 딥다이브 팀미션 HelloFullstack팀
 
 ---
 

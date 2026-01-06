@@ -1,0 +1,35 @@
+/* Vapor UI Design System */
+:root {
+  --v-primary: #3498db;
+  --v-secondary: #2ecc71;
+  --v-danger: #e74c3c;
+  --v-dark: #2c3e50;
+  --v-light: #ecf0f1;
+  --v-radius: 6px;
+  --v-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.v-btn {
+  padding: 10px 20px;
+  border-radius: var(--v-radius);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--v-shadow);
+  color: white;
+}
+
+.v-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.v-btn:active {
+  transform: translateY(0);
+}
+
+.v-btn-primary { background-color: var(--v-primary); }
+.v-btn-secondary { background-color: var(--v-secondary); }
+.v-btn-danger { background-color: var(--v-danger); }
