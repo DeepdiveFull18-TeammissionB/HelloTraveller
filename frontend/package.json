@@ -7,21 +7,29 @@
         "dev": "vite",
         "build": "vite build",
         "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "test": "vitest"
     },
     "dependencies": {
+        "@vapor-ui/core": "^1.0.0-beta.11",
         "axios": "^1.6.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },
     "devDependencies": {
-        "@types/react": "^18.2.66",
-        "@types/react-dom": "^18.2.22",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.1",
+        "@types/node": "^25.0.3",
+        "@types/react": "^18.3.27",
+        "@types/react-dom": "^18.3.7",
         "@vitejs/plugin-react": "^4.2.1",
         "eslint": "^8.57.0",
         "eslint-plugin-react": "^7.34.1",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.6",
-        "vite": "^5.2.0"
+        "jsdom": "^27.4.0",
+        "typescript": "^5.9.3",
+        "vite": "^5.2.0",
+        "vitest": "^4.0.16"
     }
 }
