@@ -16,14 +16,15 @@
 ## 🛠 기술 스택
 
 ### Frontend
-- Next.js 15 (App Router)
+- Next.js 16 (App Router)
 - React 19
 - TypeScript
 - Vapor UI (goorm Design System)
+- Turbopack (Build System)
 
 ### Backend
 - Node.js
-- Express.js
+- Express.js (Port: 4000)
 
 ## 🚀 시작하기
 
@@ -43,22 +44,42 @@ npm run dev
 
 서버 실행 후 `http://localhost:3000` 접속
 
+## 🔧 문제 해결 (Troubleshooting)
+
+개발 환경 실행 중 터미널에 에러가 반복되거나 포트 충돌이 발생할 경우 다음을 수행하세요:
+
+### 1. 포트 및 프로세스 점유 문제
+이미 Node 프로세스가 실행 중이라 포트(3000, 4000)가 사용 중일 때:
+```powershell
+# 모든 Node 프로세스 강제 종료
+taskkill /f /im node.exe
+```
+
+### 2. 빌드 캐시 오류
+"Module not found" 등의 에러가 무한 반복될 경우 캐시를 삭제하세요:
+```powershell
+# 프론트엔드 폴더에서 실행
+rm -r -force .next
+npm run dev
+```
+
 ## 📂 프로젝트 구조
 
 ```
 HelloTraveller/
-├── HelloTraveller_fromJ/          # 초기 버전 (Vanilla JS)
-└── HelloTraveller_fromJ_next.js/  # Next.js 리팩토링 버전
-    ├── backend/                   # Express 서버
-    └── frontend/                  # Next.js 앱
+├── backend/                   # Express 서버
+├── frontend/                  # Next.js 16 앱
+├── .gitignore                 # Git 무시 파일
+└── README.md                  # 프로젝트 설명
+
 ```
 
 ## ✨ 주요 기능
 
-- 여행 상품 조회 및 상세 정보 모달
-- 실시간 장바구니 및 가격 계산
-- 추가 옵션 선택
-- 주문 확인 및 제출
+- 여행 상품 조회 및 상세 정보 모달 (Vapor UI 기반)
+- 실시간 가격 계산 시스템 (React Context)
+- 여행 날짜 및 인원 선택 옵션
+- 최종 주문 확인 및 제출 기능
 
 ## 👥 팀 정보
 
