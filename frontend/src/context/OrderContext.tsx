@@ -1,3 +1,4 @@
+"use client";
 import React, { createContext, useMemo, useState, useEffect, ReactNode } from "react";
 
 export type OrderType = "products" | "options";

@@ -7,7 +7,7 @@ app.use(express.json())
 
 const port = 4000;
 app.use(cors({
-  origin: 'http://localhost:5173',  // 프론트가 떠 있는 주소
+  origin: 'http://localhost:3000',
   credentials: true
 }));
 

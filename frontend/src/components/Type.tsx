@@ -1,5 +1,9 @@
+"use client";
 import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import {
+    Text
+} from '@vapor-ui/core';
 import Products from './Products';
 import Options from './Options';
 import OrderContext, { OrderType } from '../context/OrderContext';
@@ -36,7 +40,6 @@ const Type: React.FC<TypeProps> = ({ orderType }) => {
         }
     };
 
-    // Generic component picker
     const ItemComponent = orderType === "products" ? Products : Options;
 
     const optionItems = items.map((item) => (
@@ -51,14 +54,21 @@ const Type: React.FC<TypeProps> = ({ orderType }) => {
     ));
 
     return (
-        <div>
-            <h2>주문 종류</h2>
-            <p>하나의 가격</p>
-            <p>총 가격 : {orderData.totals[orderType]}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <Text typography="heading4" style={{ fontWeight: 700 }}>
+                    {orderType === 'products' ? '투어 상품 선택' : '여행 옵션 선택'}
+                </Text>
+                <Text typography="body3" color="text-secondary">
+                    선택한 항목 합계: {orderData.totals[orderType].toLocaleString()}원
+                </Text>
+            </div>
+
             <div
                 style={{
-                    display: 'flex',
-                    flexDirection: orderType === "options" ? "column" : "row",
+                    display: 'grid',
+                    gridTemplateColumns: orderType === "products" ? 'repeat(2, 1fr)' : '1fr',
+                    gap: '1rem'
                 }}
             >
                 {optionItems}
