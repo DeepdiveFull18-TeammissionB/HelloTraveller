@@ -1,0 +1,288 @@
+.container {
+    width: 100%;
+    min-height: 100vh;
+    padding-left: 220px;
+    position: relative;
+    background: white;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Hero Section */
+.hero {
+    align-self: stretch;
+    padding: 60px 170px;
+    background: rgba(0, 0, 0, 0.60);
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/hero-bg.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.heroContent {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    text-align: center;
+}
+
+.heroTitle {
+    color: white;
+    font-size: 40px;
+    font-family: var(--font-roboto);
+    font-weight: 700;
+    line-height: 48px;
+}
+
+.heroSubtitle {
+    color: white;
+    font-size: 16px;
+    font-family: var(--font-roboto);
+    font-weight: 400;
+    line-height: 24px;
+}
+
+.heroButtons {
+    display: flex;
+    gap: 12px;
+}
+
+.btnOutline {
+    width: 240px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px white solid;
+    color: white;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btnSolid {
+    width: 240px;
+    padding: 12px;
+    background: black;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    height: 100%;
+    padding-top: 12px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    z-index: 900;
+}
+
+.sidebarItem {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.iconBox {
+    width: 24px;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sidebarText {
+    color: black;
+    font-size: 16px;
+    font-family: var(--font-roboto);
+    font-weight: 500;
+}
+
+/* Sections */
+.section {
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+}
+
+.sectionHeader {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sectionTitle {
+    font-size: 40px;
+    font-weight: 700;
+}
+
+.sectionSubtitle {
+    font-size: 16px;
+    color: #333;
+}
+
+/* Card Grid */
+.cardGrid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.card {
+    border-radius: 6px;
+    border: 1px rgba(0, 0, 0, 0.10) solid;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.cardImage {
+    height: 340px;
+    background: rgba(216.75, 216.75, 216.75, 0.50);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cardBadge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border-bottom-right-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.cardBody {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cardTitle {
+    font-size: 16px;
+}
+
+.cardDuration {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.cardIcons {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+/* Booking Form */
+.bookingForm {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.input {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px rgba(0, 0, 0, 0.10) solid;
+    color: rgba(0, 0, 0, 0.50);
+    font-size: 14px;
+}
+
+.tagGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.formButtons {
+    display: flex;
+    gap: 12px;
+}
+
+.btnCancel {
+    flex: 1;
+    padding: 12px;
+    border: 1px black solid;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btnSubmit {
+    flex: 1;
+    padding: 12px;
+    background: black;
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+
+@media (max-width: 1200px) {
+    .cardGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .container {
+        padding-left: 0;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .cardGrid {
+        grid-template-columns: 1fr;
+    }
+}
