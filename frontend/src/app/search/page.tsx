@@ -42,7 +42,7 @@ export default function SearchPage() {
                     </div>
                 </div>
 
-                <div className={styles.cardGrid}>
+                <div className={cardStyleGrid}>
                     {[
                         { title: '장흥 해변 투어', duration: '2일 1박', badge: '인기 상품', sub: '여름 해변' },
                         { title: '알프스 하이킹', duration: '3일', badge: '모험 상품', sub: '알프스 산맥' },
@@ -103,3 +103,5 @@ export default function SearchPage() {
         </div>
     );
 }
+
+const cardStyleGrid = styles.cardGrid; // Fix for reference if needed
