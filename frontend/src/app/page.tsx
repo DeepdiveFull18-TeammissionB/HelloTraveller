@@ -1,77 +1,145 @@
 "use client";
 import React, { useContext } from 'react';
-import {
-  Text,
-  Card,
-  Button
-} from '@vapor-ui/core';
+import styles from './page.module.css';
 import Type from '@/components/Type';
-import SummaryPage from '@/components/SummaryPage';
 import OrderContext from '@/context/OrderContext';
-
+import Link from 'next/link';
 export default function Home() {
   const context = useContext(OrderContext);
   if (!context) return null;
   const [orderData] = context;
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        {/* 헤더 */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center', textAlign: 'center' }}>
-          <Text typography="heading1" style={{ fontWeight: 800 }}>Hello Traveller</Text>
-          <Text typography="body1" color="text-secondary">Vapor UI Native Layout 적용</Text>
+    <div className={styles.container}>
+      {/* Hero Section */}
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <h2 className={styles.heroTitle}>즉흥 여행의 시작!</h2>
+          <p className={styles.heroSubtitle}>복잡한 예약 없이 간편하게 여행 상품을 찾아보세요.</p>
+          <Link href="/search" className={styles.heroButtonWrapper} style={{ textDecoration: 'none' }}>
+            <span className={styles.heroButtonText}>여행 상품 탐색하기</span>
+          </Link>
+        </div>
+        <div className={styles.heroImageArea}>
+          <img
+            src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+            alt="Travel Hero"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </div>
+      </section>
+
+      {/* Recommended Tours Section */}
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>추천 투어 상품</h2>
+          <p className={styles.sectionSubtitle}>최고의 여행이 기다리고 있습니다!</p>
         </div>
 
-        {/* 메인 레이아웃: 왼쪽(투어상품) + 오른쪽(옵션+주문) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', alignItems: 'start' }}>
+        {/* Integrating existing Type component for dynamic product loading */}
+        <div style={{ width: '100%', maxWidth: '1100px' }}>
+          <Type orderType="products" hideHeader={true} />
+        </div>
+      </section>
 
-          {/* 왼쪽: 투어 상품 */}
-          <Card.Root style={{ padding: '1.5rem', border: '1px solid #f0f0f0' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <Text typography="heading3" style={{ fontWeight: 700 }}>투어 상품</Text>
-              <Type orderType="products" />
-            </div>
-          </Card.Root>
-
-          {/* 오른쪽: 옵션 + 주문 확인 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-
-            {/* 오른쪽 위: 추가 옵션 */}
-            <Card.Root style={{ padding: '1.5rem', border: '1px solid #f0f0f0' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <Text typography="heading3" style={{ fontWeight: 700 }}>추가 옵션</Text>
-                <Type orderType="options" />
-              </div>
-            </Card.Root>
-
-            {/* 오른쪽 아래: 주문 확인 */}
-            <Card.Root style={{ padding: '1.5rem', border: '1px solid #eee', position: 'sticky', top: '2rem' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <Text typography="heading3" style={{ fontWeight: 700 }}>주문 확인</Text>
-
-                <div>
-                  <SummaryPage />
-                </div>
-
-                <div style={{ borderTop: '1px solid #eee', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text typography="heading4">최종 금액</Text>
-                    <Text typography="heading2" color="primary" style={{ fontWeight: 800 }}>
-                      {orderData.totals.total.toLocaleString()}원
-                    </Text>
-                  </div>
-
-                  <Button colorPalette="primary" size="xl" style={{ width: '100%', height: '56px' }}>
-                    주문하기
-                  </Button>
-                </div>
-              </div>
-            </Card.Root>
-
+      {/* Booking Section */}
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>예약하기</h2>
+          <p className={styles.sectionSubtitle}>원하시는 인원 수와 날짜를 선택하세요!</p>
+        </div>
+        <div className={styles.bookingFormGrid}>
+          <div className={styles.inputGroup}>
+            <label className={styles.inputLabel}>인원 수</label>
+            <div className={styles.inputField}>인원을 입력하세요</div>
+          </div>
+          <div className={styles.inputGroup}>
+            <label className={styles.inputLabel}>여행 날짜</label>
+            <div className={styles.inputField}>YYYY-MM-DD</div>
+          </div>
+          <div className={styles.orderButtonWrapper}>
+            <span className={styles.orderButtonText}>지금 당장 투어 상품 보러가기</span>
           </div>
         </div>
+      </section>
+
+      {/* Promo Bar */}
+      <div className={styles.promoBar}>
+        <p className={styles.promoText}>지금 예약하면 특별 할인이 있습니다! 놓치지 마세요.</p>
       </div>
+
+      {/* Extra Options Section - New Layout */}
+      <section className={styles.sideHeaderSection}>
+        <div className={styles.sideHeaderArea}>
+          <h2 className={styles.sideTitle}>부가 옵션</h2>
+          <p className={styles.sideSubtitle}>여행을 더욱 완벽하게!</p>
+        </div>
+
+        <div className={styles.optionsList}>
+          {[
+            {
+              title: '여행자 보험',
+              sub: '안전한 여행',
+              price: '$10 추가',
+              icon: '🛡️'
+            },
+            {
+              title: '식사권 포함',
+              sub: '맛있는 저녁',
+              price: '$20 추가',
+              icon: '🍽️'
+            },
+            {
+              title: '좌석 업그레이드',
+              sub: '더 편안한 여행',
+              price: '$15 추가',
+              icon: '✈️'
+            }
+          ].map((option, idx) => (
+            <div key={idx} className={styles.optionItem}>
+              <div className={styles.optionIconCircle}>
+                <span style={{ fontSize: '50px' }}>{option.icon}</span>
+              </div>
+              <div className={styles.optionTextGroup}>
+                <h3 className={styles.optionItemTitle}>{option.title}</h3>
+                <p className={styles.optionItemSub}>{option.sub}</p>
+              </div>
+              <p className={styles.optionItemPrice}>{option.price}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Customer Reviews Section */}
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>고객 리뷰</h2>
+          <p className={styles.sectionSubtitle}>우리의 여행을 경험한 고객들이 남긴 이야기</p>
+        </div>
+        <div className={styles.reviewGrid}>
+          <div className={styles.reviewCard}>
+            <div className={styles.reviewUser}>
+              <div className={styles.userAvatar}></div>
+              <span className={styles.userName}>김지연</span>
+            </div>
+            <p className={styles.reviewText}>정말 쉽고 빠르게 예약할 수 있었습니다! 최고의 경험!</p>
+          </div>
+          <div className={styles.reviewCard}>
+            <div className={styles.reviewUser}>
+              <div className={styles.userAvatar}></div>
+              <span className={styles.userName}>이승민</span>
+            </div>
+            <p className={styles.reviewText}>여행사와의 소통도 원활하여 좋았습니다!</p>
+          </div>
+          <div className={styles.reviewCard}>
+            <div className={styles.reviewUser}>
+              <div className={styles.userAvatar}></div>
+              <span className={styles.userName}>박수민</span>
+            </div>
+            <p className={styles.reviewText}>즉흥 여행을 좋아하는 저에게 딱 맞는 서비스입니다!</p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

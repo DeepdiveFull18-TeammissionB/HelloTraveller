@@ -1,5 +1,5 @@
-"use client";
 import React, { ChangeEvent, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
     Card,
     Text,
@@ -28,6 +28,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, updateItemCount })
                 <Card.Root
                     style={{
                         width: '240px',
+                        flexShrink: 0,
                         padding: '0',
                         overflow: 'hidden',
                         borderRadius: '16px',
@@ -53,7 +54,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, updateItemCount })
             </div>
 
             {/* 커스텀 모달 */}
-            {isOpen && (
+            {isOpen && typeof document !== 'undefined' && createPortal(
                 <div
                     style={{
                         position: 'fixed',
@@ -61,11 +62,11 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, updateItemCount })
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        zIndex: 1000
+                        zIndex: 9999
                     }}
                     onClick={() => setIsOpen(false)}
                 >
@@ -204,7 +205,8 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, updateItemCount })
                             </Button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );
