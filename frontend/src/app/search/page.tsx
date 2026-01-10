@@ -2,24 +2,13 @@
 import React from 'react';
 import Link from 'next/link';
 import styles from './search.module.css';
+import SearchSidebar from '@/components/SearchSidebar';
+
 export default function SearchPage() {
     return (
         <div className={styles.container}>
             {/* Sidebar */}
-            <aside className={styles.sidebar}>
-                {[
-                    { icon: '🏖️', label: '해변 여행' },
-                    { icon: '🏞️', label: '산악 여행' },
-                    { icon: '🏙️', label: '도시 탐방' },
-                    { icon: '🚴‍♂️', label: '모험 여행' },
-                ].map((item, idx) => (
-                    <div key={idx} className={styles.sidebarItem}>
-                        <div className={styles.iconBox}>{item.icon}</div>
-                        <span className={styles.sidebarText}>{item.label}</span>
-                    </div>
-                ))}
-            </aside>
-
+            <SearchSidebar/>
             {/* Hero Section */}
             <section className={styles.hero}>
                 <div className={styles.heroContent}>
