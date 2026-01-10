@@ -1,8 +1,8 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import styles from './cart.module.css';
-export default function CartPage() {
+import styles from './payment.module.css';
+export default function PaymentPage() {
     return (
         <div className={styles.container}>
             {/* Hero / Detailed Info Header */}
