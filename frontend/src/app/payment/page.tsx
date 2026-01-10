@@ -5,6 +5,7 @@ import styles from './payment.module.css';
 import CartList from '../../components/CartList';
 import OrderSummary from '../../components/OrderSummary';
 import PaymentSuccess from '../../components/PaymentSuccess';
+import Type from '../../components/Type';
 
 type PaymentStep = 'cart' | 'completed';
 
@@ -63,7 +64,7 @@ export default function PaymentPage() {
                         <p className={styles.sectionSubtitle}>여행의 즐거움을 더해줄 추가 상품을 선택하세요.</p>
                     </div>
                 </div>
-                <div className={styles.extraGrid}>
+                {/* <div className={styles.extraGrid}>
                     {[
                         { title: '좌석 업그레이드', price: '₩30,000', badge: '인기', sub: '비행기좌석 업그레이드' },
                         { title: '조식', price: '₩15,000', badge: '추천', sub: '호텔 조식 포함' },
@@ -81,7 +82,9 @@ export default function PaymentPage() {
                             </div>
                         </div>
                     ))}
-                </div>
+                </div> */}
+                <Type orderType="options" hideHeader={true} />
+                
             </section>
 
             {/* Product Detail Info Section */}
