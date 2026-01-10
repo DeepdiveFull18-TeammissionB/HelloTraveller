@@ -10,9 +10,11 @@ interface Item {
 
 interface SearchTourListProps {
     category: string;
+    maxItems?: number;
+    isCompact?: boolean;
 }
 
-const SearchTourList: React.FC<SearchTourListProps> = ({ category }) => {
+const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isCompact = false }) => {
     const [items, setItems] = useState<Item[]>([]);
 
     const handleUpdateCount = (name: string, count: string) => {
@@ -35,9 +37,17 @@ const SearchTourList: React.FC<SearchTourListProps> = ({ category }) => {
         loadItems();
     }, [category]);
         
+    const displayedItems = maxItems ? items.slice(0, maxItems) : items;
+
     return (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', padding: '20px' }}>
-            {items.map((prod) => (
+        <div style={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: '20px', 
+            padding: isCompact ? '10px 0' : '20px',
+            justifyContent: isCompact ? 'center' : 'flex-start'
+        }}>
+            {displayedItems.map((prod) => (
                 <Products
                     key={prod.name}
                     name={prod.name}

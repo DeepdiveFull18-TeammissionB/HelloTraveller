@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import styles from '../app/search/search.module.css';
+import SearchTourList from './SearchTourList';
 
 interface SearchMainProps {
     onDetailsClick: () => void;
@@ -40,29 +41,8 @@ const SearchMain: React.FC<SearchMainProps> = ({ onDetailsClick, onSearchClick }
                     </div>
                 </div>
 
-                <div className={cardStyleGrid}>
-                    {[
-                        { title: '장흥 해변 투어', duration: '2일 1박', badge: '인기 상품', sub: '여름 해변' },
-                        { title: '알프스 하이킹', duration: '3일', badge: '모험 상품', sub: '알프스 산맥' },
-                        { title: '서울 야경 투어', duration: '1일', badge: '추천', sub: '도시 야경' },
-                        { title: '아이슬란드 오로라 투어', duration: '5일 4박', badge: '특별 상품', sub: '오로라 관측' },
-                        { title: '지중해 크루즈', duration: '7일', badge: '럭셔리 상품', sub: '지중해 크루즈' },
-                    ].map((card, idx) => (
-                        <div key={idx} className={styles.card}>
-                            <div className={styles.cardImage}>
-                                <div className={styles.cardBadge}>{card.badge}</div>
-                                <span style={{ fontSize: 12 }}>{card.sub}</span>
-                            </div>
-                            <div className={styles.cardBody}>
-                                <div className={styles.cardTitle}>{card.title}</div>
-                                <div className={styles.cardDuration}>{card.duration}</div>
-                                <div className={styles.cardIcons}>
-                                    <span>💖</span>
-                                    <span>🔥</span>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                <div className={cardStyleGrid} style={{ display: 'block', gridTemplateColumns: 'none' }}>
+                    <SearchTourList category="추천 여행" maxItems={3} isCompact={true} />
                 </div>
             </section>
 
