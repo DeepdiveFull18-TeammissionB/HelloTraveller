@@ -14,13 +14,14 @@ interface ProductsProps {
     imagePath: string;
     description?: string;
     updateItemCount: (itemName: string, newItemCount: string) => void;
+    width?: string;
 }
 
 /**
  * 여행 상품 컴포넌트
  * 이미지 기반의 카드 타입 UI와 상세 정보를 볼 수 있는 프리미엄 모달을 제공합니다.
  */
-const Products: React.FC<ProductsProps> = ({ name, imagePath, description, updateItemCount }) => {
+const Products: React.FC<ProductsProps> = ({ name, imagePath, description, updateItemCount, width = '280px' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -40,7 +41,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, updat
             >
                 <Card.Root
                     style={{
-                        width: '280px',
+                        width: width,
                         flexShrink: 0,
                         padding: '0',
                         overflow: 'hidden',

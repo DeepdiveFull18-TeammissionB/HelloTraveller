@@ -1,4 +1,9 @@
-const SearchSidebar = () => {
+interface SearchSidebarProps {
+    onCategorySelect: (category: string) => void;
+    selectedCategory: string;
+}
+
+const SearchSidebar: React.FC<SearchSidebarProps> = ({ onCategorySelect, selectedCategory }) => {
     return (
         <aside style={sidebarStyle}>
             {[
@@ -6,12 +11,28 @@ const SearchSidebar = () => {
                 { icon: '🏞️', label: '산악 여행' },
                 { icon: '🏙️', label: '도시 탐방' },
                 { icon: '🚴‍♂️', label: '모험 여행' },
-            ].map((item, idx) => (
-                <div key={idx} style={sidebarItemStyle}>
-                    <div style={iconBoxStyle}>{item.icon}</div>
-                    <span style={sidebarTextStyle}>{item.label}</span>
-                </div>
-            ))}
+                { icon: '✈️', label: '추천 여행' },
+            ].map((item, idx) => {
+                const isSelected = selectedCategory === item.label;
+                return (
+                    <div 
+                        key={idx} 
+                        style={{
+                            ...sidebarItemStyle,
+                            backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
+                            borderRight: isSelected ? '3px solid #4F46E5' : '3px solid transparent',
+                        }}
+                        onClick={() => onCategorySelect(item.label)}
+                    >
+                        <div style={iconBoxStyle}>{item.icon}</div>
+                        <span style={{
+                            ...sidebarTextStyle,
+                            fontWeight: isSelected ? 700 : 500,
+                            color: isSelected ? '#4F46E5' : 'black',
+                        }}>{item.label}</span>
+                    </div>
+                );
+            })}
         </aside>
     );
 }

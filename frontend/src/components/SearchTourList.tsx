@@ -1,0 +1,54 @@
+import React, { useEffect, useState } from 'react';
+import Products from './Products';
+import axios from 'axios';
+
+interface Item {
+    name: string;
+    imagePath: string;
+    description: string;
+}
+
+interface SearchTourListProps {
+    category: string;
+}
+
+const SearchTourList: React.FC<SearchTourListProps> = ({ category }) => {
+    const [items, setItems] = useState<Item[]>([]);
+
+    const handleUpdateCount = (name: string, count: string) => {
+    console.log(`${name} 상품 ${count}명 예약`);
+    // 상태 업데이트 로직 추가
+    };
+
+    const loadItems = async () => {
+            try {
+                // TODO: use category for filtering or API call
+                console.log('Selected Category:', category);
+                const response = await axios.get(`http://localhost:4000/products`);
+                setItems(response.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+    useEffect(() => {
+        loadItems();
+    }, [category]);
+        
+    return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', padding: '20px' }}>
+            {items.map((prod) => (
+                <Products
+                    key={prod.name}
+                    name={prod.name}
+                    imagePath={prod.imagePath}
+                    description={prod.description}
+                    updateItemCount={handleUpdateCount}
+                    width="250px"
+                />
+            ))}
+        </div>
+    );
+};
+
+export default SearchTourList;
