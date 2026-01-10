@@ -73,7 +73,7 @@ const SearchMain: React.FC<SearchMainProps> = ({ onDetailsClick, onSearchClick }
                         </div>
                         <div className={styles.formButtons}>
                             <div className={styles.btnCancel}>취소</div>
-                            <Link href="/payment" className={styles.btnSolid} style={{ textDecoration: 'none' }}>예약하기</Link>
+                            <Link href="/cart" className={styles.btnSolid} style={{ textDecoration: 'none' }}>예약하기</Link>
                         </div>
                     </div>
                 </div>
