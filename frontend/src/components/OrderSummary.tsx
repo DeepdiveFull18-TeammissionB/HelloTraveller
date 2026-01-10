@@ -79,7 +79,7 @@ const summaryCardStyle: React.CSSProperties = {
     background: '#fff',
     border: '1px solid #eee',
     boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-    width: '100%'
+    width: '50%'
 };
 
 const contentWrapperStyle: React.CSSProperties = {

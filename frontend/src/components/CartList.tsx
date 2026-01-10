@@ -11,14 +11,15 @@ interface CartItem {
 
 interface CartListProps {
     items: CartItem[];
+    style?: React.CSSProperties;
 }
 
 /**
  * 이미지 1의 왼쪽 장바구니 리스트 영역 컴포넌트
  */
-const CartList: React.FC<CartListProps> = ({ items }) => {
+const CartList: React.FC<CartListProps> = ({ items, style }) => {
     return (
-        <Card.Root style={cartContainerStyle}>
+        <Card.Root style={{ ...cartContainerStyle, ...style }}>
             <div style={{ marginBottom: '32px' }}>
                 <Text typography="heading3" style={{ fontWeight: 800 }}>장바구니</Text>
                 <Text typography="body2" color="text-secondary">선택된 상품 목록</Text>

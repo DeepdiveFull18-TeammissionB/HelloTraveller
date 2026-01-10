@@ -1,8 +1,29 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from './payment.module.css';
+import CartList from '../../components/CartList';
+import OrderSummary from '../../components/OrderSummary';
+import PaymentSuccess from '../../components/PaymentSuccess';
+
+type PaymentStep = 'cart' | 'completed';
+
 export default function PaymentPage() {
+    const [step, setStep] = useState<PaymentStep>('cart');
+
+    const handleOrder = () => {
+        setStep('completed');
+        window.scrollTo(0, 0);
+    };
+
+    if (step === 'completed') {
+        return (
+            <div className={styles.container}>
+                <PaymentSuccess />
+            </div>
+        );
+    }
+
     return (
         <div className={styles.container}>
             {/* Hero / Detailed Info Header */}
@@ -18,17 +39,28 @@ export default function PaymentPage() {
                     </div>
                 </div>
             </section>
-
+            <section style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%', padding: '20px' }}>
+                <CartList
+                    items={[
+                        { name: 'Poland 투어', date: '2026.01.07', count: 2, options: ['생수 제공', '가이드 및 설명 제공'] },
+                        { name: 'Poland 투어', date: '2026.01.07', count: 2, options: ['생수 제공', '가이드 및 설명 제공'] },
+                        { name: 'Poland 투어', date: '2026.01.07', count: 2, options: ['생수 제공', '가이드 및 설명 제공'] }
+                    ]}
+                />
+                <OrderSummary
+                    guestCount={6}
+                    productAmount={6000}
+                    optionAmount={2000}
+                    totalAmount={8000}
+                    onOrder={handleOrder}
+                />
+            </section>
             {/* Extra Products Section */}
             <section className={styles.extraSection}>
                 <div className={styles.extraHeader}>
                     <div className={styles.extraHeaderText}>
                         <h2 className={styles.sectionTitle}>추가 상품</h2>
                         <p className={styles.sectionSubtitle}>여행의 즐거움을 더해줄 추가 상품을 선택하세요.</p>
-                    </div>
-                    <div className={styles.buttonGroup}>
-                        <div className={styles.btnOutline}>취소</div>
-                        <div className={styles.btnSolid}>선택 완료</div>
                     </div>
                 </div>
                 <div className={styles.extraGrid}>
@@ -58,10 +90,6 @@ export default function PaymentPage() {
                     <div className={styles.extraHeaderText}>
                         <h2 className={styles.sectionTitle}>상품 정보</h2>
                         <p className={styles.sectionSubtitle}>상품의 세부정보를 확인하세요.</p>
-                    </div>
-                    <div className={styles.buttonGroup}>
-                        <div className={styles.btnOutline}>돌아가기</div>
-                        <div className={styles.btnSolid}>자세히 보기</div>
                     </div>
                 </div>
                 <div className={styles.detailInfoList}>
