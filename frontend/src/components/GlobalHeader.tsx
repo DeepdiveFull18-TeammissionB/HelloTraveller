@@ -26,9 +26,9 @@ const GlobalHeader = () => {
             return {
                 title: "여행 상품 결제",
                 links: [
-                    { label: '여행 상품' },
-                    { label: '내 예약' },
-                    { label: '장바구니' },
+                    { label: '여행 상품', href: '/search' },
+                    { label: '내 예약', href: '/orders' },
+                    { label: '장바구니', href: '/payment'},
                     { label: '문의하기' },
                     { label: '로그아웃' }
                 ],
@@ -40,7 +40,7 @@ const GlobalHeader = () => {
             title: "Home",
             links: [
                 { label: '여행 상품', href: '/search' },
-                { label: '장바구니' },
+                { label: '장바구니', href: '/payment'},
                 { label: '문의하기' },
                 { label: '로그인' }
             ],

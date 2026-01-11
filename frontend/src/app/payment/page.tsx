@@ -49,6 +49,11 @@ export default function PaymentPage() {
         window.scrollTo(0, 0);
     };
 
+    const handleCountChange = (name: string, count: number) => {
+        // Context의 updateItemCount를 활용 (isReplace 옵션이 있다면 true로)
+        updateItemCount(name, count, "products", {}, true); 
+    };
+
     // 결제 완료 시 컴포넌트 불러오기
     if (step === 'completed') {
         return (
@@ -78,6 +83,7 @@ export default function PaymentPage() {
                     items={orderData.productItems}
                     onItemClick={(item) => setSelectedItem(item)}
                     selectedItemName={selectedItem?.name}
+                    onCountChange={handleCountChange}
                 />
                 <OrderSummary
                     guestCount={orderData.totals.totalCount}

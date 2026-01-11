@@ -10,6 +10,7 @@ interface Totals {
     options: number;    // 옵션 총 금액
     total: number;      // 전체 합계 금액
     totalCount: number; // 상품 총 수량
+    isReplace?: boolean
 }
 
 export interface OrderItem extends ItemDetail {
@@ -34,7 +35,8 @@ type UpdateItemCount = (
         startDate?: string; 
         endDate?: string; 
         selectedOptions?: string[]
-    }
+    },
+    isReplace?: boolean,
 ) => void;
 
 
@@ -126,7 +128,8 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
                 startDate?: string; 
                 endDate?: string; 
                 selectedOptions?: string[]
-            }
+            },
+            isReplace: boolean = false
         ) {
             const addCount = typeof newItemCount === 'string' ? parseInt(newItemCount) || 0 : newItemCount;
 
@@ -136,11 +139,12 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
                 
                 // 기존 데이터가 있으면 유지하고 수량만 합산, 없으면 새로 받은 메타데이터 사용
                 newMap.set(itemName, {
-                    count: (existingItem?.count || 0) + addCount,
+                    // isReplace가 true면 입력된 값 그대로, false면 기존값에 더하기
+                    count: isReplace ? addCount : (existingItem?.count || 0) + addCount,
                     imagePath: metadata?.imagePath || existingItem?.imagePath || "",
                     startDate: metadata?.startDate || existingItem?.startDate,
                     endDate: metadata?.endDate || existingItem?.endDate,
-                    selectedOptions: metadata?.selectedOptions || existingItem?.selectedOptions,
+                    selectedOptions: metadata?.selectedOptions || existingItem?.selectedOptions || [],
                 });
 
                 return { ...prev, [orderType]: newMap };
