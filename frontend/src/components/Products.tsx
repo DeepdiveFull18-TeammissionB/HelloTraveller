@@ -251,6 +251,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                 <div style={{ background: '#f8f9fa', padding: '24px', borderRadius: '20px' }}>
                                     <label style={{ display: 'block', marginBottom: '12px', fontSize: '15px', fontWeight: 700 }}>👥 인원 선택</label>
                                     <TextInput
+                                        
                                         value={String(personCount)}
                                         min="1"
                                         placeholder="인원 수를 입력하세요"

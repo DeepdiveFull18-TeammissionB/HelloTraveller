@@ -4,10 +4,13 @@ import styles from './page.module.css';
 import Type from '@/components/Type';
 import OrderContext from '@/context/OrderContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 export default function Home() {
   const context = useContext(OrderContext);
   if (!context) return null;
   const [orderData] = context;
+  const router = useRouter();
 
   return (
     <div className={styles.container}>
@@ -57,7 +60,7 @@ export default function Home() {
             <label className={styles.inputLabel}>여행 날짜</label>
             <div className={styles.inputField}>YYYY-MM-DD</div>
           </div>
-          <div className={styles.orderButtonWrapper}>
+          <div className={styles.orderButtonWrapper} onClick={() => router.push('/search')}>
             <span className={styles.orderButtonText}>지금 당장 투어 상품 보러가기</span>
           </div>
         </div>
