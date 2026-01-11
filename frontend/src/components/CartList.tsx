@@ -4,11 +4,12 @@ import { Card, Text } from '@vapor-ui/core';
 
 interface CartItem {
     name: string;
-    date: string;
-    options: string[];
+    imagePath?: string;
+    startDate?: string;
+    endDate?: string;
     count: number;
+    selectedOptions?: string[];
 }
-
 interface CartListProps {
     items: CartItem[];
     style?: React.CSSProperties;
@@ -33,10 +34,10 @@ const CartList: React.FC<CartListProps> = ({ items, style }) => {
                                 {item.name}
                             </Text>
                             <Text typography="body3" color="text-secondary" style={{ display: 'block', marginBottom: '8px' }}>
-                                {item.date}
+                                {item.startDate}-{item.endDate}
                             </Text>
                             <div style={optionListStyle}>
-                                {item.options.map((opt, i) => (
+                                {item.selectedOptions?.map((opt, i) => (
                                     <Text key={i} typography="body3" style={{ display: 'block', color: '#666' }}>
                                         {opt}
                                     </Text>

@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import OrderContext from '../../context/OrderContext';
 import Link from 'next/link';
 import styles from './payment.module.css';
 import CartList from '../../components/CartList';
@@ -9,11 +10,17 @@ import Type from '../../components/Type';
 
 type PaymentStep = 'cart' | 'completed';
 
+
+
 export default function PaymentPage() {
     const [step, setStep] = useState<PaymentStep>('cart');
 
+    const contextValue = useContext(OrderContext);
+    const resetCart = contextValue?.[2];
+
     const handleOrder = () => {
         setStep('completed');
+        resetCart;
         window.scrollTo(0, 0);
     };
 
@@ -24,6 +31,12 @@ export default function PaymentPage() {
             </div>
         );
     }
+
+
+    const context = useContext(OrderContext);
+    if (!context) return null;
+
+    const [orderData, updateItemCount] = context;
 
     return (
         <div className={styles.container}>
@@ -42,17 +55,13 @@ export default function PaymentPage() {
             </section>
             <section style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%', padding: '20px' }}>
                 <CartList
-                    items={[
-                        { name: 'Poland 투어', date: '2026.01.07', count: 2, options: ['생수 제공', '가이드 및 설명 제공'] },
-                        { name: 'Poland 투어', date: '2026.01.07', count: 2, options: ['생수 제공', '가이드 및 설명 제공'] },
-                        { name: 'Poland 투어', date: '2026.01.07', count: 2, options: ['생수 제공', '가이드 및 설명 제공'] }
-                    ]}
+                    items={orderData.productItems}
                 />
                 <OrderSummary
-                    guestCount={6}
-                    productAmount={6000}
-                    optionAmount={2000}
-                    totalAmount={8000}
+                    guestCount={orderData.totals.totalCount}
+                    productAmount={orderData.totals.products}
+                    optionAmount={orderData.totals.options}
+                    totalAmount={orderData.totals.total}
                     onOrder={handleOrder}
                 />
             </section>

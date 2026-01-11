@@ -1,20 +1,27 @@
 "use client";
 
-// Context에서 사용하는 타입을 그대로 가져옵니다.
-type OrderType = "products" | "options";
+// 1. Context와 동일한 상세 정보 인터페이스 정의
+export interface ItemDetail {
+  count: number;
+  imagePath: string;
+  startDate?: string;
+  endDate?: string;
+  selectedOptions?: string[];
+}
 
-interface OrderCounts {
-  products: Map<string, number>;
-  options: Map<string, number>;
+export interface OrderCounts {
+  products: Map<string, ItemDetail>;
+  options: Map<string, ItemDetail>;
 }
 
 const CART_KEY = "hello_traveler_cart";
 
 export const cartService = {
-
+  /**
+   * 장바구니 저장: 객체 형태의 ItemDetail도 JSON.stringify가 자동으로 처리해줍니다.
+   */
   saveCart: (orderCounts: OrderCounts): void => {
     try {
-      // Map은 바로 JSON이 안 되므로 [Key, Value] 형태의 배열로 변환
       const serializableData = {
         products: Array.from(orderCounts.products.entries()),
         options: Array.from(orderCounts.options.entries()),
@@ -25,6 +32,9 @@ export const cartService = {
     }
   },
 
+  /**
+   * 장바구니 로드: 복원할 때도 Map<string, ItemDetail> 구조로 복원합니다.
+   */
   getCartItems: (): OrderCounts => {
     try {
       const data = localStorage.getItem(CART_KEY);
@@ -32,9 +42,17 @@ export const cartService = {
 
       const parsed = JSON.parse(data);
 
+      const transformToMap = (entries: any[]) => {
+        const newMap = new Map<string, ItemDetail>();
+        entries.forEach(([name, value]) => {
+            newMap.set(name, value);
+        });
+        return newMap;
+      };
+
       return {
-        products: new Map(parsed.products),
-        options: new Map(parsed.options),
+        products: transformToMap(parsed.products || []),
+        options: transformToMap(parsed.options || []),
       };
     } catch (error) {
       console.error("장바구니 로드 실패:", error);
@@ -42,16 +60,14 @@ export const cartService = {
     }
   },
 
-
-  // 결제 완료 후 장바구니 비우기
+  // 결제 완료 후 비우기 및 주문번호 생성은 기존과 동일
   clearCart: (): void => {
     localStorage.removeItem(CART_KEY);
   },
 
-  // 주문번호 생성
   generateOrderNumber: (): string => {
     const date = new Date();
-    const dateString = date.toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
+    const dateString = date.toISOString().slice(0, 10).replace(/-/g, "");
     const randomString = Math.random().toString(36).substring(2, 7).toUpperCase();
     return `HT-${dateString}-${randomString}`;
   }

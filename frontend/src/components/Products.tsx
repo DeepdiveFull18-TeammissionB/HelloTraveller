@@ -1,6 +1,7 @@
 "use client";
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useState, useContext } from 'react';
 import { createPortal } from 'react-dom';
+import OrderContext from '../context/OrderContext';
 import {
     Card,
     Text,
@@ -13,7 +14,7 @@ interface ProductsProps {
     name: string;
     imagePath: string;
     description?: string;
-    updateItemCount: (itemName: string, newItemCount: string) => void;
+    //updateItemCount: (itemName: string, newItemCount: string) => void;
     width?: string;
 }
 
@@ -21,13 +22,18 @@ interface ProductsProps {
  * 여행 상품 컴포넌트
  * 이미지 기반의 카드 타입 UI와 상세 정보를 볼 수 있는 프리미엄 모달을 제공합니다.
  */
-const Products: React.FC<ProductsProps> = ({ name, imagePath, description, updateItemCount, width = '280px' }) => {
+const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width = '280px' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [personCount, setPersonCount] = useState<number>(1);
+
+    const contextValue = useContext(OrderContext);
+    if (!contextValue) return null; // Context가 없을 경우 안전장치
+    const [, updateItemCount] = contextValue;
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         const currentValue = event.target.value;
-        updateItemCount(name, currentValue);
+        setPersonCount(parseInt(currentValue));
     };
 
     return (
@@ -261,7 +267,20 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, updat
                             </div>
 
                             <Button
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => {
+                                    setIsOpen(false); 
+                                    updateItemCount(
+                                        name, 
+                                        personCount,
+                                        "products",
+                                        {
+                                            imagePath: `http://localhost:4000/${imagePath}`,
+                                            startDate: "2026.01.10",
+                                            endDate: "2026.01.15",
+                                            selectedOptions: ["생수 제공", "교통비 포함"]
+                                        }
+                                    );
+                                }}
                                 style={{
                                     backgroundColor: '#4F46E5',
                                     color: 'white',
