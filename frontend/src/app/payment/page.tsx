@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import OrderContext from '../../context/OrderContext';
 import Link from 'next/link';
 import styles from './payment.module.css';
@@ -14,6 +14,7 @@ type PaymentStep = 'cart' | 'completed';
 
 export default function PaymentPage() {
     const [step, setStep] = useState<PaymentStep>('cart');
+    const [selectedItem, setSelectedItem] = useState<any>(null);
 
     const contextValue = useContext(OrderContext);
     const resetCart = contextValue?.[2];
@@ -38,6 +39,12 @@ export default function PaymentPage() {
 
     const [orderData, updateItemCount] = context;
 
+    useEffect(() => {
+        if (orderData.productItems.length > 0 && !selectedItem) {
+            setSelectedItem(orderData.productItems[0]);
+        }
+    }, [orderData.productItems, selectedItem]);
+
     return (
         <div className={styles.container}>
             {/* Hero / Detailed Info Header */}
@@ -56,6 +63,8 @@ export default function PaymentPage() {
             <section style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%', padding: '20px' }}>
                 <CartList
                     items={orderData.productItems}
+                    onItemClick={(item) => setSelectedItem(item)}
+                    selectedItemName={selectedItem?.name}
                 />
                 <OrderSummary
                     guestCount={orderData.totals.totalCount}
@@ -105,21 +114,34 @@ export default function PaymentPage() {
                     </div>
                 </div>
                 <div className={styles.detailInfoList}>
-                    {[
-                        { label: '여행 시작일', value: '2023년 12월 01일', tag: '정확한 일정' },
-                        { label: '여행 종료일', value: '2023년 12월 08일', tag: '일주일' },
-                        { label: '출발지', value: '인천국제공항', tag: null },
-                        { label: '도착지', value: '파리, 프랑스', tag: null },
-                    ].map((info, idx) => (
-                        <div key={idx} className={styles.detailItem}>
-                            <div className={styles.detailItemImage} />
-                            <div className={styles.itemInfo}>
-                                <h3 className={styles.itemLabel}>{info.label}</h3>
-                                <p className={styles.itemValue}>{info.value}</p>
-                                {info.tag && <div className={styles.tag}>{info.tag}</div>}
+                    {selectedItem ? (
+                        [
+                            { label: '여행 시작일', value: selectedItem.startDate, tag: '확정 일정' },
+                            { label: '여행 종료일', value: selectedItem.endDate, tag: '귀국 일정' },
+                            { label: '출발지', value: '인천국제공항 (ICN)', tag: '자동입력' },
+                            { label: '도착지', value: `${selectedItem.name} 인근 공항`, tag: '자동입력' },
+                        ].map((info, idx) => (
+                            <div key={idx} className={styles.detailItem}>
+                                <div 
+                                    className={styles.detailItemImage} 
+                                    style={{ 
+                                        backgroundImage: `url(${selectedItem.imagePath})`, // 이미 Context에서 http://... 포함해서 저장했으므로 그대로 사용
+                                        backgroundSize: 'cover' 
+                                    }} 
+                                />
+                                <div className={styles.itemInfo}>
+                                    <h3 className={styles.itemLabel}>{info.label}</h3>
+                                    <p className={styles.itemValue}>{info.value}</p>
+                                    {info.tag && <div className={styles.tag}>{info.tag}</div>}
+                                </div>
                             </div>
+                        ))
+                    ) : (
+                        /* 2. 상품이 선택되지 않았을 때 보여줄 안내 문구 */
+                        <div style={{ padding: '40px', textAlign: 'center', width: '100%', color: '#999' }}>
+                            <h2>장바구니에서 상세 정보를 확인하실 상품을 선택해 주세요.</h2>
                         </div>
-                    ))}
+                    )}
                 </div>
             </section>
         </div>

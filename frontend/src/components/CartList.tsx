@@ -18,17 +18,29 @@ interface CartListProps {
 /**
  * 이미지 1의 왼쪽 장바구니 리스트 영역 컴포넌트
  */
-const CartList: React.FC<CartListProps> = ({ items, style }) => {
+const CartList: React.FC<CartListProps & { onItemClick?: (item: any) => void, selectedItemName?: string }> = 
+({ items, style, onItemClick, selectedItemName }) => {
     return (
         <Card.Root style={{ ...cartContainerStyle, ...style }}>
-            <div style={{ marginBottom: '32px' }}>
+            <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <Text typography="heading3" style={{ fontWeight: 800 }}>장바구니</Text>
                 <Text typography="body2" color="text-secondary">선택된 상품 목록</Text>
             </div>
 
             <div style={listWrapperStyle}>
                 {items.map((item, idx) => (
-                    <div key={idx} style={itemRowStyle}>
+                    <div 
+                        key={idx} 
+                        onClick={() => onItemClick && onItemClick(item)}
+                        style={{
+                            ...itemRowStyle,
+                            backgroundColor: selectedItemName === item.name ? '#f0f4ff' : 'transparent',
+                            cursor: 'pointer',
+                            padding: '20px',
+                            borderRadius: '12px',
+                            border: selectedItemName === item.name ? '1px solid #4F46E5' : '1px solid transparent'
+                        }}
+                    >
                         <div style={itemInfoAreaStyle}>
                             <Text typography="heading5" style={{ fontWeight: 700, marginBottom: '4px', display: 'block' }}>
                                 {item.name}

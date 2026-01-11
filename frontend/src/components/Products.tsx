@@ -18,6 +18,8 @@ interface ProductsProps {
     width?: string;
 }
 
+const allOptions = ['현지 가이드 동행', '교통비 포함', '전용 보트 서비스', '중식 및 생수 제공', '입장료 전부 포함', '여행자 보험'];
+
 /**
  * 여행 상품 컴포넌트
  * 이미지 기반의 카드 타입 UI와 상세 정보를 볼 수 있는 프리미엄 모달을 제공합니다.
@@ -26,6 +28,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [personCount, setPersonCount] = useState<number>(1);
+    const [selectedOptions, setSelectedOptions] = useState<string[]>(allOptions);
 
     const contextValue = useContext(OrderContext);
     if (!contextValue) return null; // Context가 없을 경우 안전장치
@@ -34,6 +37,14 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         const currentValue = event.target.value;
         setPersonCount(parseInt(currentValue));
+    };
+
+    const handleOptionChange = (option: string) => {
+        setSelectedOptions((prev) =>
+            prev.includes(option) 
+                ? prev.filter((item) => item !== option) // 이미 있으면 제거
+                : [...prev, option]                      // 없으면 추가
+        );
     };
 
     return (
@@ -233,7 +244,12 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                                     {['현지 가이드 동행', '교통비 포함', '전용 보트 서비스', '중식 및 생수 제공', '입장료 전부 포함', '여행자 보험'].map((opt, i) => (
                                         <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#fff', border: '1px solid #f0f0f0', padding: '12px 16px', borderRadius: '12px' }}>
-                                            <Checkbox.Root checked={true} id={`opt-${name}-${i}`} style={{ width: '20px', height: '20px' }}>
+                                            <Checkbox.Root 
+                                                checked={selectedOptions.includes(opt)} 
+                                                onCheckedChange={() => handleOptionChange(opt)}
+                                                id={`opt-${name}-${i}`} 
+                                                style={{ width: '20px', height: '20px' }}
+                                            >
                                                 <Checkbox.IndicatorPrimitive />
                                             </Checkbox.Root>
                                             <label htmlFor={`opt-${name}-${i}`} style={{ fontSize: '14px', fontWeight: 500, cursor: 'pointer', color: '#444' }}>{opt}</label>
@@ -277,7 +293,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                             imagePath: `http://localhost:4000/${imagePath}`,
                                             startDate: "2026.01.10",
                                             endDate: "2026.01.15",
-                                            selectedOptions: ["생수 제공", "교통비 포함"]
+                                            selectedOptions: selectedOptions
                                         }
                                     );
                                 }}

@@ -57,7 +57,7 @@ const Options: React.FC<OptionsProps> = ({ name, description, updateItemCount })
                     <Checkbox.Root
                         id={`${name}-option`}
                         onCheckedChange={(checked: boolean) => {
-                            updateItemCount(name, checked ? 1 : 0);
+                            updateItemCount(name, checked ? 1 : -1);
                         }}
                         style={{ width: '24px', height: '24px' }}
                     >
