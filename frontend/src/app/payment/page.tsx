@@ -7,6 +7,7 @@ import CartList from '../../components/CartList';
 import OrderSummary from '../../components/OrderSummary';
 import PaymentSuccess from '../../components/PaymentSuccess';
 import Type from '../../components/Type';
+import { cartService } from '../../services/cartService';
 
 type PaymentStep = 'cart' | 'completed';
 
@@ -25,9 +26,24 @@ export default function PaymentPage() {
     }, [context, selectedItem]);
 
     if (!context) return null;
+    
     const [orderData, updateItemCount, resetCart] = context;
 
+    const isCartEmpty = orderData.productItems.length === 0;
+
     const handleOrder = () => {
+        const orderId = cartService.generateOrderNumber();
+
+        const newOrder = {
+            orderId: orderId,
+            orderDate: new Date().toLocaleString(),
+            items: orderData.productItems,
+            totalAmount: orderData.totals.total,
+            totalCount: orderData.totals.totalCount
+        };
+
+        cartService.placeOrder(newOrder);
+
         setStep('completed');
         if (resetCart) resetCart(); 
         window.scrollTo(0, 0);
@@ -68,7 +84,7 @@ export default function PaymentPage() {
                     productAmount={orderData.totals.products}
                     optionAmount={orderData.totals.options}
                     totalAmount={orderData.totals.total}
-                    onOrder={handleOrder}
+                    onOrder={!isCartEmpty ? handleOrder : () => alert('장바구니에 상품이 없습니다.')}
                 />
             </section>
             {/* Extra Products Section */}

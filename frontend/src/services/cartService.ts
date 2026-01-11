@@ -15,6 +15,7 @@ export interface OrderCounts {
 }
 
 const CART_KEY = "hello_traveler_cart";
+const ORDERS_KEY = "hello_traveler_orders";
 
 export const cartService = {
   /**
@@ -63,6 +64,34 @@ export const cartService = {
   // 결제 완료 후 비우기 및 주문번호 생성은 기존과 동일
   clearCart: (): void => {
     localStorage.removeItem(CART_KEY);
+  },
+
+  placeOrder: (orderDetail: any): void => {
+    try {
+      // 1. 기존에 저장된 주문 목록을 가져옵니다.
+      const existingOrdersData = localStorage.getItem(ORDERS_KEY);
+      const orders = existingOrdersData ? JSON.parse(existingOrdersData) : [];
+
+      // 2. 새 주문을 목록 맨 앞에 추가합니다.
+      orders.unshift(orderDetail);
+
+      // 3. 다시 로컬스토리지에 저장합니다.
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    } catch (error) {
+      console.error("주문 저장 실패:", error);
+    }
+  },
+
+  /**
+   * 주문 목록 불러오기
+   */
+  getOrders: (): any[] => {
+    try {
+      const data = localStorage.getItem(ORDERS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      return [];
+    }
   },
 
   generateOrderNumber: (): string => {
