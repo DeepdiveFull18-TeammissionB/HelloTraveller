@@ -16,15 +16,24 @@ export default function PaymentPage() {
     const [step, setStep] = useState<PaymentStep>('cart');
     const [selectedItem, setSelectedItem] = useState<any>(null);
 
-    const contextValue = useContext(OrderContext);
-    const resetCart = contextValue?.[2];
+    const context = useContext(OrderContext);
+    
+    useEffect(() => {
+        if (context && context[0].productItems.length > 0 && !selectedItem) {
+            setSelectedItem(context[0].productItems[0]);
+        }
+    }, [context, selectedItem]);
+
+    if (!context) return null;
+    const [orderData, updateItemCount, resetCart] = context;
 
     const handleOrder = () => {
         setStep('completed');
-        resetCart;
+        if (resetCart) resetCart(); 
         window.scrollTo(0, 0);
     };
 
+    // 결제 완료 시 컴포넌트 불러오기
     if (step === 'completed') {
         return (
             <div className={styles.container}>
@@ -32,18 +41,6 @@ export default function PaymentPage() {
             </div>
         );
     }
-
-
-    const context = useContext(OrderContext);
-    if (!context) return null;
-
-    const [orderData, updateItemCount] = context;
-
-    useEffect(() => {
-        if (orderData.productItems.length > 0 && !selectedItem) {
-            setSelectedItem(orderData.productItems[0]);
-        }
-    }, [orderData.productItems, selectedItem]);
 
     return (
         <div className={styles.container}>

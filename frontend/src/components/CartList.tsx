@@ -46,7 +46,7 @@ const CartList: React.FC<CartListProps & { onItemClick?: (item: any) => void, se
                                 {item.name}
                             </Text>
                             <Text typography="body3" color="text-secondary" style={{ display: 'block', marginBottom: '8px' }}>
-                                {item.startDate}-{item.endDate}
+                                {item.startDate} ~ {item.endDate}
                             </Text>
                             <div style={optionListStyle}>
                                 {item.selectedOptions?.map((opt, i) => (

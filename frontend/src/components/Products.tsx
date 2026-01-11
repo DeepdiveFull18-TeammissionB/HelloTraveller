@@ -14,7 +14,6 @@ interface ProductsProps {
     name: string;
     imagePath: string;
     description?: string;
-    //updateItemCount: (itemName: string, newItemCount: string) => void;
     width?: string;
 }
 
@@ -27,8 +26,10 @@ const allOptions = ['현지 가이드 동행', '교통비 포함', '전용 보�
 const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width = '280px' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-    const [personCount, setPersonCount] = useState<number>(1);
+    const [personCount, setPersonCount] = useState<string>("1");
     const [selectedOptions, setSelectedOptions] = useState<string[]>(allOptions);
+    const [startDate, setStartDate] = useState<string>("2026-01-10");
+    const [endDate, setEndDate] = useState<string>("2026-01-15");
 
     const contextValue = useContext(OrderContext);
     if (!contextValue) return null; // Context가 없을 경우 안전장치
@@ -36,9 +37,10 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         const currentValue = event.target.value;
-        setPersonCount(parseInt(currentValue));
+        // 숫자만 입력 가능하게 필터링
+        const onlyNumber = currentValue.replace(/[^0-9]/g, '');
+        setPersonCount(onlyNumber);
     };
-
     const handleOptionChange = (option: string) => {
         setSelectedOptions((prev) =>
             prev.includes(option) 
@@ -209,23 +211,48 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '40px' }}>
                                 <div style={{ background: '#f8f9fa', padding: '24px', borderRadius: '20px' }}>
                                     <label style={{ display: 'block', marginBottom: '12px', fontSize: '15px', fontWeight: 700 }}>📅 여행 일정</label>
-                                    <TextInput
-                                        defaultValue="2026.01.10"
-                                        readOnly
-                                        style={{
-                                            borderRadius: '12px',
-                                            width: '100%',
-                                            fontSize: '16px',
-                                            padding: '12px',
-                                            border: '1px solid #e0e0e0'
-                                        }}
-                                    />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <input
+                                            type="date"
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                            style={{
+                                                // Vapor UI의 TextInput과 최대한 비슷하게 보이도록 스타일 조정
+                                                borderRadius: '12px',
+                                                width: '100%',
+                                                fontSize: '16px',
+                                                padding: '12px',
+                                                border: '1px solid #e0e0e0',
+                                                backgroundColor: 'white',
+                                                outline: 'none',
+                                                color: '#1a1a1a',
+                                                fontFamily: 'inherit' // 폰트 일관성 유지
+                                            }}
+                                        />
+                                        <input
+                                            type="date"
+                                            value={endDate}
+                                            onChange={(e) => setEndDate(e.target.value)}
+                                            style={{
+                                                // Vapor UI의 TextInput과 최대한 비슷하게 보이도록 스타일 조정
+                                                borderRadius: '12px',
+                                                width: '100%',
+                                                fontSize: '16px',
+                                                padding: '12px',
+                                                border: '1px solid #e0e0e0',
+                                                backgroundColor: 'white',
+                                                outline: 'none',
+                                                color: '#1a1a1a',
+                                                fontFamily: 'inherit' // 폰트 일관성 유지
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                                 <div style={{ background: '#f8f9fa', padding: '24px', borderRadius: '20px' }}>
                                     <label style={{ display: 'block', marginBottom: '12px', fontSize: '15px', fontWeight: 700 }}>👥 인원 선택</label>
                                     <TextInput
-                                        defaultValue="0"
-                                        min="0"
+                                        value={String(personCount)}
+                                        min="1"
                                         placeholder="인원 수를 입력하세요"
                                         onChange={handleChange as any}
                                         style={{
@@ -291,8 +318,8 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                         "products",
                                         {
                                             imagePath: `http://localhost:4000/${imagePath}`,
-                                            startDate: "2026.01.10",
-                                            endDate: "2026.01.15",
+                                            startDate: startDate,
+                                            endDate: endDate,
                                             selectedOptions: selectedOptions
                                         }
                                     );
