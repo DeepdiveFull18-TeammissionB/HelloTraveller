@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useMemo, useState, useEffect, ReactNode } from "react";
+import { cartService } from "../services/cartService";
 
 export type OrderType = "products" | "options";
 
@@ -17,6 +18,13 @@ interface OrderCounts {
 export interface OrderData extends OrderCounts {
     totals: Totals;
 }
+
+const [orderCounts, setOrderCounts] = useState<OrderCounts>({
+    products: new Map(),
+    options: new Map()
+});
+
+
 
 type UpdateItemCount = (itemName: string, newItemCount: string | number, orderType: OrderType) => void;
 
@@ -47,6 +55,11 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
         options: 500,
     };
 
+    useEffect(() => {
+        const savedData = cartService.getCartItems();
+        setOrderCounts(savedData);
+    }, []);
+
     function calculateSubtotal(orderType: OrderType, currentOrderCounts: OrderCounts): number {
         let countSum = 0;
         const itemsMap = currentOrderCounts[orderType];
@@ -60,11 +73,14 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
         const productsTotal = calculateSubtotal("products", orderCounts);
         const optionsTotal = calculateSubtotal("options", orderCounts);
         const total = productsTotal + optionsTotal;
+        
         setTotals({
             products: productsTotal,
             options: optionsTotal,
             total: total,
         });
+
+        cartService.saveCart(orderCounts);
     }, [orderCounts]);
 
     const value = useMemo<OrderContextValue>(() => {
