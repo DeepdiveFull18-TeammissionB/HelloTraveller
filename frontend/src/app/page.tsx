@@ -1,7 +1,7 @@
 "use client";
 import React, { useContext } from 'react';
 import styles from './page.module.css';
-import Type from '@/components/Type';
+import Type from '@/components/domains/shared/Type';
 import OrderContext from '@/context/OrderContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';

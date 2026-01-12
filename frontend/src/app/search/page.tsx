@@ -2,9 +2,9 @@
 import React from 'react';
 import Link from 'next/link';
 import styles from './search.module.css';
-import SearchSidebar from '@/components/SearchSidebar';
-import SearchMain from '@/components/SearchMain';
-import SearchTourList from '@/components/SearchTourList';
+import SearchSidebar from '@/components/domains/search/SearchSidebar';
+import SearchMain from '@/components/domains/search/SearchMain';
+import SearchTourList from '@/components/domains/search/SearchTourList';
 
 export default function SearchPage() {
     const [view, setView] = React.useState<'main' | 'tourList'>('main');
@@ -18,16 +18,16 @@ export default function SearchPage() {
     return (
         <div className={styles.container}>
             {/* Sidebar */}
-            <SearchSidebar 
-                onCategorySelect={handleCategorySelect} 
-                selectedCategory={selectedCategory} 
+            <SearchSidebar
+                onCategorySelect={handleCategorySelect}
+                selectedCategory={selectedCategory}
             />
-            
+
             {/* Dynamic Content Area */}
-            {view === 'main' && <SearchMain 
-                                    onDetailsClick={() => {setView('tourList'); setSelectedCategory('추천 여행');}} 
-                                    onSearchClick={() => {setView('tourList'); setSelectedCategory('해변 여행');}} 
-                                />}
+            {view === 'main' && <SearchMain
+                onDetailsClick={() => { setView('tourList'); setSelectedCategory('추천 여행'); }}
+                onSearchClick={() => { setView('tourList'); setSelectedCategory('해변 여행'); }}
+            />}
             {view === 'tourList' && <SearchTourList category={selectedCategory} />}
         </div>
     );

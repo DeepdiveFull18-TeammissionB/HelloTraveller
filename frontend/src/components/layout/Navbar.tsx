@@ -33,7 +33,11 @@ const Navbar = ({ title, links, showLogoCircle = true }: NavbarProps) => {
                 {showLogoCircle && (
                     <div
                         className={styles.logoCircle}
-                        onClick={() => router.back()}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            router.back();
+                        }}
                         style={{ cursor: 'pointer' }}
                     >
                         <span style={{ fontSize: '32px', color: 'rgba(0,0,0,0.8)', paddingBottom: '6px', paddingRight: '1px' }}>‹</span>
@@ -42,7 +46,13 @@ const Navbar = ({ title, links, showLogoCircle = true }: NavbarProps) => {
                 <h1
                     className={styles.logoText}
                     onClick={() => {
-                        if (pathname === '/') {
+                        if (pathname.startsWith('/search')) {
+                            // 탐색 페이지에서는 해당 페이지 초기화 (메인으로)
+                            window.location.href = '/search';
+                        } else if (pathname.startsWith('/payment')) {
+                            // 결제 페이지에서는 해당 페이지 초기화 (메인으로)
+                            window.location.href = '/payment';
+                        } else if (pathname === '/') {
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         } else {
                             router.push('/');

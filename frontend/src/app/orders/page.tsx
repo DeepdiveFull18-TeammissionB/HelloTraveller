@@ -4,7 +4,7 @@ import { cartService } from '../../services/cartService';
 import styles from './orders.module.css';
 import Link from 'next/link';
 import { Button, Text } from '@vapor-ui/core';
-import { showAlert } from '../../components/AlertPortal';
+import { showAlert } from '../../components/common/AlertPortal';
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<any[]>([]);

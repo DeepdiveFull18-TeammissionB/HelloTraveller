@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import Products from './Products';
-import apiClient from '../services/apiClient';
+import Products from '../shared/Products';
+import apiClient from '../../../services/apiClient';
 import { useRouter } from 'next/navigation';
 
 interface Item {

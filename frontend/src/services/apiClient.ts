@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 백엔드 URL 관리 (마이그레이션 시 이 부분만 수정하면 됩니다)
-export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const apiClient = axios.create({
     baseURL: BASE_URL,

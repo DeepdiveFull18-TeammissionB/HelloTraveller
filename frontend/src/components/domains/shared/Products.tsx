@@ -1,7 +1,7 @@
 "use client";
 import React, { ChangeEvent, useState, useContext } from 'react';
 import { createPortal } from 'react-dom';
-import OrderContext from '../context/OrderContext';
+import OrderContext from '../../../context/OrderContext';
 import {
     Card,
     Text,
@@ -9,9 +9,9 @@ import {
     TextInput,
     Checkbox
 } from '@vapor-ui/core';
-import { showAlert } from './AlertPortal';
+import { showAlert } from '../../common/AlertPortal';
 import { useRouter } from 'next/navigation';
-import { BASE_URL } from '../services/apiClient';
+import { BASE_URL } from '../../../services/apiClient';
 interface ProductsProps {
     name: string;
     imagePath: string;

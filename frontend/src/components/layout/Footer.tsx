@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import styles from './SharedStyles.module.css';
+import styles from '../common/SharedStyles.module.css';
 
 const Footer = () => {
     return (

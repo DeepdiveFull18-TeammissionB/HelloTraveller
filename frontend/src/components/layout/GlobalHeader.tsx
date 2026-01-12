@@ -2,9 +2,9 @@
 import React from 'react';
 import Header from './Header';
 import Navbar, { NavbarProps } from './Navbar';
-import styles from './SharedStyles.module.css';
+import styles from '../common/SharedStyles.module.css';
 import { usePathname } from 'next/navigation';
-import { cartService } from '../services/cartService';
+import { cartService } from '../../services/cartService';
 
 export default function GlobalHeader() {
     const pathname = usePathname();

@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { Card, Text, Checkbox, Button } from '@vapor-ui/core';
-import { showAlert } from './AlertPortal';
+import { showAlert } from '../../common/AlertPortal';
 
 interface OrderSummaryProps {
     guestCount?: number;

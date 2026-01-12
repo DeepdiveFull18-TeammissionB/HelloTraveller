@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import styles from '../app/search/search.module.css';
+import styles from '../../../app/search/search.module.css';
 import SearchTourList from './SearchTourList';
-import { showAlert } from './AlertPortal';
+import { showAlert } from '../../common/AlertPortal';
 
 interface SearchMainProps {
     onDetailsClick: () => void;

@@ -3,13 +3,13 @@ import React, { useState, useContext, useEffect } from 'react';
 import OrderContext from '../../context/OrderContext';
 import Link from 'next/link';
 import styles from './payment.module.css';
-import CartList from '../../components/CartList';
-import OrderSummary from '../../components/OrderSummary';
-import OrderComplete from '../../components/OrderComplete';
-import PaymentSuccess from '../../components/PaymentSuccess'; // 다시 추가
-import Type from '../../components/Type';
+import CartList from '../../components/domains/order/CartList';
+import OrderSummary from '../../components/domains/order/OrderSummary';
+import OrderComplete from '../../components/common/OrderComplete';
+import PaymentSuccess from '../../components/common/PaymentSuccess'; // 다시 추가
+import Type from '../../components/domains/shared/Type';
 import { cartService } from '../../services/cartService';
-import { showAlert } from '../../components/AlertPortal';
+import { showAlert } from '../../components/common/AlertPortal';
 import { useRouter } from 'next/navigation'; // useRouter 추가
 
 type PaymentStep = 'cart' | 'processing' | 'completed'; // processing 단계 추가

@@ -6,8 +6,8 @@ import {
 } from '@vapor-ui/core';
 import Products from './Products';
 import Options from './Options';
-import OrderContext from '../context/OrderContext';
-import { OrderType } from '../types/order';
+import OrderContext from '../../../context/OrderContext';
+import { OrderType } from '../../../types/order';
 
 interface Item {
     name: string;
@@ -22,7 +22,7 @@ interface TypeProps {
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
-import apiClient from '../services/apiClient';
+import apiClient from '../../../services/apiClient';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';

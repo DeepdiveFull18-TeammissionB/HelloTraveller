@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import styles from './SharedStyles.module.css';
+import styles from '../common/SharedStyles.module.css';
 
 interface HeaderProps {
     title?: string;
