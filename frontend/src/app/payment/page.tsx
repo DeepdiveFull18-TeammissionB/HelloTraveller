@@ -193,7 +193,7 @@ export default function PaymentPage() {
                                 <div
                                     className={styles.detailItemImage}
                                     style={{
-                                        backgroundImage: `url(${selectedItem.imagePath})`, // 이미 Context에서 http://... 포함해서 저장했으므로 그대로 사용
+                                        backgroundImage: `url(${selectedItem.imagePath})`,
                                         backgroundSize: 'cover'
                                     }}
                                 />

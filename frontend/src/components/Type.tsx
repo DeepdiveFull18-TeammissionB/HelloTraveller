@@ -6,7 +6,8 @@ import {
 } from '@vapor-ui/core';
 import Products from './Products';
 import Options from './Options';
-import OrderContext, { OrderType } from '../context/OrderContext';
+import OrderContext from '../context/OrderContext';
+import { OrderType } from '../types/order';
 
 interface Item {
     name: string;
@@ -21,6 +22,7 @@ interface TypeProps {
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
+import apiClient from '../services/apiClient';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -41,7 +43,7 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
 
     const loadItems = async (type: OrderType) => {
         try {
-            const response = await axios.get(`http://localhost:4000/${type}`);
+            const response = await apiClient.get(`/${type}`);
             setItems(response.data);
         } catch (error) {
             console.log(error);

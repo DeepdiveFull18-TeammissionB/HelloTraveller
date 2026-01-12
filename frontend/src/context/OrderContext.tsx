@@ -1,26 +1,9 @@
 "use client";
 import React, { createContext, useMemo, useState, useEffect, ReactNode } from "react";
-import { cartService, OrderCounts, ItemDetail } from "../services/cartService";
+import { cartService } from "../services/cartService";
+import { OrderData, OrderCounts, Totals, OrderType, ItemDetail, OrderItem } from "../types/order";
 
-
-export type OrderType = "products" | "options";
-
-interface Totals {
-    products: number;   // 상품 총 금액
-    options: number;    // 옵션 총 금액
-    total: number;      // 전체 합계 금액
-    totalCount: number; // 상품 총 수량
-}
-
-export interface OrderItem extends ItemDetail {
-    name: string;
-}
-
-export interface OrderData extends OrderCounts {
-    totals: Totals;
-    productItems: OrderItem[]; // 추가: 배열 형태의 상품 리스트
-    optionItems: OrderItem[];  // 추가: 배열 형태의 옵션 리스트
-}
+// Local types removed as they are now imported from ../types/order
 
 
 

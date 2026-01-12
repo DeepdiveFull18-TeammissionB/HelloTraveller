@@ -11,6 +11,7 @@ import {
 } from '@vapor-ui/core';
 import { showAlert } from './AlertPortal';
 import { useRouter } from 'next/navigation';
+import { BASE_URL } from '../services/apiClient';
 interface ProductsProps {
     name: string;
     imagePath: string;
@@ -88,7 +89,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                 transition: 'transform 0.5s ease',
                                 transform: isHovered ? 'scale(1.1)' : 'scale(1)'
                             }}
-                            src={`http://localhost:4000/${imagePath}`}
+                            src={`${BASE_URL}/${imagePath}`}
                             alt={`${name} product`}
                         />
                         <div style={{
@@ -170,7 +171,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                     objectFit: 'cover',
                                     display: 'block'
                                 }}
-                                src={`http://localhost:4000/${imagePath}`}
+                                src={`${BASE_URL}/${imagePath}`}
                                 alt={`${name} tour`}
                             />
                             <div style={{
@@ -356,7 +357,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                         countNum,
                                         "products",
                                         {
-                                            imagePath: `http://localhost:4000/${imagePath}`,
+                                            imagePath: `${BASE_URL}/${imagePath}`,
                                             startDate: startDate,
                                             endDate: endDate,
                                             selectedOptions: selectedOptions

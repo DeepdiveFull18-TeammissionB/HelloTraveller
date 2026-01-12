@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Products from './Products';
-import axios from 'axios';
+import apiClient from '../services/apiClient';
 import { useRouter } from 'next/navigation';
 
 interface Item {
@@ -22,7 +22,7 @@ const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isC
     const loadItems = async () => {
         try {
             console.log('Selected Category:', category);
-            const response = await axios.get(`http://localhost:4000/products`);
+            const response = await apiClient.get('/products');
             setItems(response.data);
         } catch (error) {
             console.log(error);

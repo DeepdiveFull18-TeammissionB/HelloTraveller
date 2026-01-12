@@ -1,18 +1,8 @@
 "use client";
 
-// 1. Context와 동일한 상세 정보 인터페이스 정의
-export interface ItemDetail {
-  count: number;
-  imagePath: string;
-  startDate?: string;
-  endDate?: string;
-  selectedOptions?: string[];
-}
+import { ItemDetail, OrderCounts } from "../types/order";
 
-export interface OrderCounts {
-  products: Map<string, ItemDetail>;
-  options: Map<string, ItemDetail>;
-}
+// Local interfaces removed as they are now imported from ../types/order
 
 const CART_KEY = "hello_traveler_cart";
 const ORDERS_KEY = "hello_traveler_orders";

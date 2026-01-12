@@ -3,6 +3,8 @@ import '@testing-library/jest-dom'
 import Products from '../Products'
 import { OrderContextProvider } from '@/context/OrderContext'
 
+import { BASE_URL } from '../../services/apiClient'
+
 describe('Products Component', () => {
     const mockUpdateItemCount = jest.fn()
 
@@ -31,7 +33,7 @@ describe('Products Component', () => {
 
         const image = screen.getByAltText('San Francisco product')
         expect(image).toBeInTheDocument()
-        expect(image).toHaveAttribute('src', 'http://localhost:4000/images/san-francisco.jpeg')
+        expect(image).toHaveAttribute('src', `${BASE_URL}/images/san-francisco.jpeg`)
     })
 
     it('displays price', () => {
