@@ -364,22 +364,15 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                         true
                                     );
 
-                                    // 2. 선택된 '포함 사항'들도 추가 옵션으로 연동 (인원수 동일하게)
-                                    selectedOptions.forEach(opt => {
-                                        updateItemCount(opt, countNum, "options", { imagePath: "" }, true);
-                                    });
-
                                     setIsOpen(false);
 
                                     showAlert({
                                         title: '장바구니 담기 완료',
-                                        message: `\n[${name}] 상품이 장바구니에 안전하게 담겼습니다.\n지금 확인하시겠습니까?`,
+                                        message: `\n[${name}] 상품 ${countNum}명이 장바구니에 담겼습니다.\n지금 바로 예약 내역을 확인하시겠습니까?`,
                                         type: 'success',
-                                        confirmLabel: '장바구니로 가기',
-                                        cancelLabel: '여행상품 계속보기',
-                                        onConfirm: () => {
-                                            router.push('/payment');
-                                        }
+                                        confirmLabel: '내역 확인하러 가기',
+                                        cancelLabel: '계속 탐색하기',
+                                        onConfirm: () => router.push('/payment')
                                     });
                                 }}
                                 style={{
