@@ -5,20 +5,26 @@ import Link from 'next/link';
 import styles from './payment.module.css';
 import CartList from '../../components/CartList';
 import OrderSummary from '../../components/OrderSummary';
-import PaymentSuccess from '../../components/PaymentSuccess';
+import OrderComplete from '../../components/OrderComplete';
+import PaymentSuccess from '../../components/PaymentSuccess'; // 다시 추가
 import Type from '../../components/Type';
 import { cartService } from '../../services/cartService';
+import { showAlert } from '../../components/AlertPortal';
+import { useRouter } from 'next/navigation'; // useRouter 추가
 
-type PaymentStep = 'cart' | 'completed';
+type PaymentStep = 'cart' | 'processing' | 'completed'; // processing 단계 추가
 
 
 
 export default function PaymentPage() {
+    const router = useRouter();
     const [step, setStep] = useState<PaymentStep>('cart');
     const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [completedOrder, setCompletedOrder] = useState<{ id: string, amount: number } | null>(null);
 
     const context = useContext(OrderContext);
-    
+
     useEffect(() => {
         if (context && context[0].productItems.length > 0 && !selectedItem) {
             setSelectedItem(context[0].productItems[0]);
@@ -26,39 +32,76 @@ export default function PaymentPage() {
     }, [context, selectedItem]);
 
     if (!context) return null;
-    
+
     const [orderData, updateItemCount, resetCart] = context;
 
     const isCartEmpty = orderData.productItems.length === 0;
 
     const handleOrder = () => {
+        if (!isConfirmed) {
+            showAlert({
+                title: '확인 단계',
+                message: '\n먼저 하단의 "주문하기" 버튼을 눌러.\n주문 내용을 최종 확인해 주세요.',
+                type: 'info'
+            });
+            return;
+        }
+
         const orderId = cartService.generateOrderNumber();
+        const totalAmount = orderData.totals.total;
 
         const newOrder = {
             orderId: orderId,
             orderDate: new Date().toLocaleString(),
-            items: orderData.productItems,
-            totalAmount: orderData.totals.total,
+            items: [
+                ...orderData.productItems.map(item => ({ ...item, type: 'tour', price: 1000 })),
+                ...orderData.optionItems.map(item => ({ ...item, type: 'option', price: 500 }))
+            ],
+            totalAmount: totalAmount,
             totalCount: orderData.totals.totalCount
         };
 
+        // 1. 주문 데이터 저장
         cartService.placeOrder(newOrder);
+        setCompletedOrder({ id: orderId, amount: totalAmount });
 
-        setStep('completed');
-        if (resetCart) resetCart(); 
+        // 2. 장바구니 초기화
+        if (resetCart) resetCart();
+
+        // 3. 결제 완료 중 페이지 노출 (3초)
+        setStep('processing');
         window.scrollTo(0, 0);
+
+        setTimeout(() => {
+            setStep('completed');
+        }, 3000);
     };
 
     const handleCountChange = (name: string, count: number) => {
-        // Context의 updateItemCount를 활용 (isReplace 옵션이 있다면 true로)
-        updateItemCount(name, count, "products", {}, true); 
+        const existingImage = orderData.productItems.find(item => item.name === name)?.imagePath || "";
+        updateItemCount(name, count, "products", { imagePath: existingImage }, true);
     };
 
-    // 결제 완료 시 컴포넌트 불러오기
-    if (step === 'completed') {
+    // 1단계: 결제 처리 중 (PaymentSuccess 노출)
+    if (step === 'processing') {
         return (
             <div className={styles.container}>
                 <PaymentSuccess />
+            </div>
+        );
+    }
+
+    // 2단계: 최종 완료 (OrderComplete 티켓 노출)
+    if (step === 'completed' && completedOrder) {
+        return (
+            <div className={styles.container}>
+                <OrderComplete
+                    dDay={7}
+                    tickets={[
+                        { orderNumber: completedOrder.id, amount: completedOrder.amount }
+                    ]}
+                    onViewOrders={() => router.push('/orders')}
+                />
             </div>
         );
     }
@@ -74,7 +117,13 @@ export default function PaymentPage() {
                         <Link href="/search" className={styles.btnOutline} style={{ textDecoration: 'none' }}>
                             상품 목록으로 돌아가기
                         </Link>
-                        <div className={styles.btnSolid}>결제 진행</div>
+                        <div
+                            className={styles.btnSolid}
+                            onClick={handleOrder}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            결제 진행
+                        </div>
                     </div>
                 </div>
             </section>
@@ -90,7 +139,7 @@ export default function PaymentPage() {
                     productAmount={orderData.totals.products}
                     optionAmount={orderData.totals.options}
                     totalAmount={orderData.totals.total}
-                    onOrder={!isCartEmpty ? handleOrder : () => alert('장바구니에 상품이 없습니다.')}
+                    onOrderConfirm={() => setIsConfirmed(true)} // 주문 확인 시 상태 업데이트
                 />
             </section>
             {/* Extra Products Section */}
@@ -121,7 +170,7 @@ export default function PaymentPage() {
                     ))}
                 </div> */}
                 <Type orderType="options" hideHeader={true} />
-                
+
             </section>
 
             {/* Product Detail Info Section */}
@@ -141,12 +190,12 @@ export default function PaymentPage() {
                             { label: '도착지', value: `${selectedItem.name} 인근 공항`, tag: '자동입력' },
                         ].map((info, idx) => (
                             <div key={idx} className={styles.detailItem}>
-                                <div 
-                                    className={styles.detailItemImage} 
-                                    style={{ 
+                                <div
+                                    className={styles.detailItemImage}
+                                    style={{
                                         backgroundImage: `url(${selectedItem.imagePath})`, // 이미 Context에서 http://... 포함해서 저장했으므로 그대로 사용
-                                        backgroundSize: 'cover' 
-                                    }} 
+                                        backgroundSize: 'cover'
+                                    }}
                                 />
                                 <div className={styles.itemInfo}>
                                     <h3 className={styles.itemLabel}>{info.label}</h3>

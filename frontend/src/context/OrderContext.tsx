@@ -10,7 +10,6 @@ interface Totals {
     options: number;    // 옵션 총 금액
     total: number;      // 전체 합계 금액
     totalCount: number; // 상품 총 수량
-    isReplace?: boolean
 }
 
 export interface OrderItem extends ItemDetail {
@@ -27,13 +26,13 @@ export interface OrderData extends OrderCounts {
 
 
 type UpdateItemCount = (
-    itemName: string, 
-    newItemCount: string | number, 
+    itemName: string,
+    newItemCount: string | number,
     orderType: OrderType,
-    metadata?: { 
-        imagePath: string; 
-        startDate?: string; 
-        endDate?: string; 
+    metadata?: {
+        imagePath: string;
+        startDate?: string;
+        endDate?: string;
         selectedOptions?: string[]
     },
     isReplace?: boolean,
@@ -62,7 +61,7 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
         total: 0,
         totalCount: 0
     });
-    
+
 
     const pricePerItem: Record<OrderType, number> = {
         products: 1000,
@@ -113,20 +112,20 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
         const mapToArray = (map: Map<string, ItemDetail>): OrderItem[] => {
             return Array.from(map.entries())
                 .filter(([_, item]) => item.count > 0)
-                .map(([name, item]) => ({ 
-                    name, 
+                .map(([name, item]) => ({
+                    name,
                     ...item
                 }));
-};
+        };
 
         function updateItemCount(
-            itemName: string, 
-            newItemCount: string | number, 
+            itemName: string,
+            newItemCount: string | number,
             orderType: OrderType,
-            metadata?: { 
-                imagePath: string; 
-                startDate?: string; 
-                endDate?: string; 
+            metadata?: {
+                imagePath: string;
+                startDate?: string;
+                endDate?: string;
                 selectedOptions?: string[]
             },
             isReplace: boolean = false
@@ -134,20 +133,42 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
             const addCount = typeof newItemCount === 'string' ? parseInt(newItemCount) || 0 : newItemCount;
 
             setOrderCounts(prev => {
-                const newMap = new Map(prev[orderType]);
-                const existingItem = newMap.get(itemName);
-                
-                // 기존 데이터가 있으면 유지하고 수량만 합산, 없으면 새로 받은 메타데이터 사용
-                newMap.set(itemName, {
-                    // isReplace가 true면 입력된 값 그대로, false면 기존값에 더하기
-                    count: isReplace ? addCount : (existingItem?.count || 0) + addCount,
-                    imagePath: metadata?.imagePath || existingItem?.imagePath || "",
-                    startDate: metadata?.startDate || existingItem?.startDate,
-                    endDate: metadata?.endDate || existingItem?.endDate,
-                    selectedOptions: metadata?.selectedOptions || existingItem?.selectedOptions || [],
-                });
+                const nextProducts = new Map(prev.products);
+                const nextOptions = new Map(prev.options);
 
-                return { ...prev, [orderType]: newMap };
+                if (orderType === "products") {
+                    const existingItem = nextProducts.get(itemName);
+                    const newCount = isReplace ? addCount : (existingItem?.count || 0) + addCount;
+
+                    nextProducts.set(itemName, {
+                        count: newCount,
+                        imagePath: metadata?.imagePath || existingItem?.imagePath || "",
+                        startDate: metadata?.startDate || existingItem?.startDate,
+                        endDate: metadata?.endDate || existingItem?.endDate,
+                        selectedOptions: metadata?.selectedOptions || existingItem?.selectedOptions || [],
+                    });
+
+                    // 상품 인원수가 바뀌면 선택된 모든 옵션의 수량도 '전체 투어 인원수'에 맞게 연동
+                    let totalPeople = 0;
+                    nextProducts.forEach(p => totalPeople += p.count);
+
+                    nextOptions.forEach((opt, key) => {
+                        if (opt.count > 0) {
+                            nextOptions.set(key, { ...opt, count: totalPeople });
+                        }
+                    });
+                } else {
+                    const existingItem = nextOptions.get(itemName);
+                    nextOptions.set(itemName, {
+                        count: isReplace ? addCount : (existingItem?.count || 0) + addCount,
+                        imagePath: metadata?.imagePath || existingItem?.imagePath || "",
+                        startDate: metadata?.startDate || existingItem?.startDate,
+                        endDate: metadata?.endDate || existingItem?.endDate,
+                        selectedOptions: metadata?.selectedOptions || existingItem?.selectedOptions || [],
+                    });
+                }
+
+                return { products: nextProducts, options: nextOptions };
             });
         }
 
@@ -163,7 +184,7 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
             productItems: mapToArray(orderCounts.products),
             optionItems: mapToArray(orderCounts.options),
         };
-        
+
         return [orderData, updateItemCount, resetCart];
     }, [orderCounts, totals]);
 

@@ -1,13 +1,14 @@
 "use client";
 import React from 'react';
 import { Card, Text, Checkbox, Button } from '@vapor-ui/core';
+import { showAlert } from './AlertPortal';
 
 interface OrderSummaryProps {
     guestCount?: number;
     productAmount?: number;
     optionAmount?: number;
     totalAmount?: number;
-    onOrder?: () => void;
+    onOrderConfirm?: () => void; // 주문 확인 절차 완료 콜백
 }
 
 /**
@@ -18,8 +19,31 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     productAmount = 0,
     optionAmount = 0,
     totalAmount = 0,
-    onOrder
+    onOrderConfirm
 }) => {
+    const [isChecked, setIsChecked] = React.useState(false);
+
+    const handleOrderClick = () => {
+        if (!isChecked) {
+            showAlert({
+                title: '확인 필요',
+                message: '\n주문 내용을 확인하셨나요?\n체크박스를 선택해 주세요.',
+                type: 'warning'
+            });
+            return;
+        }
+
+        // 1. 사용자에게 상단 버튼을 누르라고 안내
+        showAlert({
+            title: '준비 완료',
+            message: '\n주문 확인이 완료되었습니다!\n이제 상단의 [결제 진행] 버튼을 눌러주세요.',
+            type: 'success'
+        });
+
+        // 2. 부모에게 주문 확인됨을 알림
+        if (onOrderConfirm) onOrderConfirm();
+    };
+
     return (
         <Card.Root style={summaryCardStyle}>
             <div style={contentWrapperStyle}>
@@ -52,7 +76,12 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
                 {/* 확인 체크박스 (이미지 0 & 1 구성) */}
                 <div style={checkboxWrapperStyle}>
-                    <Checkbox.Root id="confirm-order" style={{ width: '20px', height: '20px' }}>
+                    <Checkbox.Root
+                        id="confirm-order"
+                        style={{ width: '20px', height: '20px' }}
+                        checked={isChecked}
+                        onCheckedChange={(checked) => setIsChecked(!!checked)}
+                    >
                         <Checkbox.IndicatorPrimitive />
                     </Checkbox.Root>
                     <label htmlFor="confirm-order" style={checkboxLabelStyle}>
@@ -64,7 +93,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                 <Button
                     colorPalette="primary"
                     style={orderButtonStyle}
-                    onClick={onOrder}
+                    onClick={handleOrderClick}
                 >
                     주문하기
                 </Button>

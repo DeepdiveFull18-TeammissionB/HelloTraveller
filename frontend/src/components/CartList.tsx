@@ -22,30 +22,30 @@ interface CartListProps {
 /**
  * 이미지 1의 왼쪽 장바구니 리스트 영역 컴포넌트
  */
-const CartList: React.FC<CartListProps> = ({ 
-    items, 
-    style, 
-    onItemClick, 
+const CartList: React.FC<CartListProps> = ({
+    items,
+    style,
+    onItemClick,
     selectedItemName,
-    onCountChange 
+    onCountChange
 }) => {
     return (
         <Card.Root style={{ ...cartContainerStyle, ...style }}>
             <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <Text typography="heading3" style={{ fontWeight: 800 }}>장바구니</Text>
-                <Text typography="body2" color="text-secondary">선택된 상품 목록</Text>
+                <Text typography="body1" color="text-secondary">선택된 상품 목록</Text>
             </div>
 
             <div style={headerRowStyle}>
-                <Text typography="body3" style={{ flex: 2, fontWeight: 700 }}>투어 정보</Text>
-                <Text typography="body3" style={{ flex: 1, fontWeight: 700, textAlign: 'center' }}>선택 옵션</Text>
-                <Text typography="body3" style={{ flex: 1, fontWeight: 700, textAlign: 'right' }}>인원수</Text>
+                <Text typography="body1" style={{ flex: 2, fontWeight: 700 }}>투어 정보</Text>
+                <Text typography="body1" style={{ flex: 1, fontWeight: 700, textAlign: 'center' }}>선택 옵션</Text>
+                <Text typography="body1" style={{ flex: 1, fontWeight: 700, textAlign: 'right' }}>인원수</Text>
             </div>
 
             <div style={listWrapperStyle}>
                 {items.map((item, idx) => (
-                    <div 
-                        key={idx} 
+                    <div
+                        key={idx}
                         onClick={() => onItemClick && onItemClick(item)}
                         style={{
                             ...itemRowStyle,
@@ -57,47 +57,47 @@ const CartList: React.FC<CartListProps> = ({
                         }}
                     >
                         <div style={{ display: 'flex', gap: '16px', flex: 2, alignItems: 'center' }}>
-                                {item.imagePath && (
-                                    <img 
-                                        src={item.imagePath} 
-                                        alt={item.name}
-                                        style={imageStyle}
-                                    />
-                                )}
-                                <div style={itemInfoAreaStyle}>
-                                    <Text typography="heading5" style={{ fontWeight: 700, marginBottom: '2px', display: 'block' }}>
-                                        {item.name}
-                                    </Text>
-                                    <Text typography="body3" color="text-secondary">
-                                        📅 {item.startDate} ~ {item.endDate}
-                                    </Text>
-                                </div>
-                            </div>  
-                        <div style={{ flex: 1, padding: '0 10px' }}>
-                                {item.selectedOptions && item.selectedOptions.length > 0 ? (
-                                    <div style={optionListStyle}>
-                                        {item.selectedOptions.map((opt, i) => (
-                                            <Text key={i} typography="body3" color="text-secondary" style={{ fontSize: '12px' }}>
-                                                • {opt}
-                                            </Text>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <Text typography="body3" color="text-tertiary" style={{ textAlign: 'center', display: 'block' }}>-</Text>
-                                )}
-                            </div>
-
-                            {/* 3. 인원수 Input 영역 */}
-                            <div style={itemCountAreaStyle} onClick={(e) => e.stopPropagation()}>
-                                <input 
-                                    type="number"
-                                    min="1"
-                                    value={item.count}
-                                    onChange={(e) => onCountChange && onCountChange(item.name, parseInt(e.target.value) || 1)}
-                                    style={quantityInputStyle}
+                            {item.imagePath && (
+                                <img
+                                    src={item.imagePath}
+                                    alt={item.name}
+                                    style={imageStyle}
                                 />
-                                <Text typography="body3" style={{ marginLeft: '4px' }}>명</Text>
+                            )}
+                            <div style={itemInfoAreaStyle}>
+                                <Text typography="heading5" style={{ fontWeight: 700, marginBottom: '2px', display: 'block' }}>
+                                    {item.name}
+                                </Text>
+                                <Text typography="body2" color="text-secondary">
+                                    📅 {item.startDate} ~ {item.endDate}
+                                </Text>
                             </div>
+                        </div>
+                        <div style={{ flex: 1, padding: '0 10px' }}>
+                            {item.selectedOptions && item.selectedOptions.length > 0 ? (
+                                <div style={optionListStyle}>
+                                    {item.selectedOptions.map((opt, i) => (
+                                        <Text key={i} typography="body2" color="text-secondary" style={{ fontSize: '14px' }}>
+                                            • {opt}
+                                        </Text>
+                                    ))}
+                                </div>
+                            ) : (
+                                <Text typography="body3" color="text-tertiary" style={{ textAlign: 'center', display: 'block' }}>-</Text>
+                            )}
+                        </div>
+
+                        {/* 3. 인원수 Input 영역 */}
+                        <div style={itemCountAreaStyle} onClick={(e) => e.stopPropagation()}>
+                            <input
+                                type="number"
+                                min="1"
+                                value={item.count}
+                                onChange={(e) => onCountChange && onCountChange(item.name, parseInt(e.target.value) || 1)}
+                                style={quantityInputStyle}
+                            />
+                            <Text typography="body1" style={{ marginLeft: '4px', fontWeight: 600 }}>명</Text>
+                        </div>
                     </div>
                 ))}
             </div>

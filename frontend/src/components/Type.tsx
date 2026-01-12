@@ -11,6 +11,7 @@ import OrderContext, { OrderType } from '../context/OrderContext';
 interface Item {
     name: string;
     imagePath: string;
+    description?: string; // 추가
 }
 
 interface TypeProps {
@@ -49,17 +50,27 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
 
     const ItemComponent = orderType === "products" ? Products : Options;
 
-    const optionItems = items.map((item) => (
-        <SwiperSlide key={item.name} style={{ width: 'auto' }}>
-            <ItemComponent
-                name={item.name}
-                imagePath={item.imagePath}
-                updateItemCount={(itemName: string, newItemCount: string | number) =>
-                    updateItemCount(itemName, newItemCount, orderType)
-                }
-            />
-        </SwiperSlide>
-    ));
+    const optionItems = items.map((item) => {
+        // 현재 선택된 항목인지 확인 (products 또는 options 맵에서 조회)
+        const currentItem = orderData[orderType].get(item.name);
+        const isChecked = (currentItem?.count || 0) > 0;
+
+        return (
+            <SwiperSlide key={item.name} style={{ width: 'auto' }}>
+                <ItemComponent
+                    name={item.name}
+                    imagePath={item.imagePath}
+                    description={item.description}
+                    checked={isChecked} // 현재 선택 상태 전달
+                    currentCount={currentItem?.count || 0}
+                    totalPeople={orderData.totals.totalCount} // 전체 인원수 전달
+                    updateItemCount={(itemName: string, newItemCount: string | number, isReplace?: boolean) =>
+                        updateItemCount(itemName, newItemCount, orderType, undefined, isReplace)
+                    }
+                />
+            </SwiperSlide>
+        );
+    });
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -91,7 +102,7 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
                     }}
                     style={{
                         width: '100%',
-                        padding: '0 10px 3.5rem 10px',
+                        padding: '20px 10px 3.5rem 10px',
                     }}
                 >
                     {optionItems}

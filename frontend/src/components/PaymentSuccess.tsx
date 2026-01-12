@@ -4,20 +4,29 @@ import { Card, Text, Button } from '@vapor-ui/core'; // Assuming these exist bas
 import Link from 'next/link';
 
 const PaymentSuccess: React.FC = () => {
+    const [seconds, setSeconds] = React.useState(3);
+
+    React.useEffect(() => {
+        if (seconds > 0) {
+            const timer = setTimeout(() => setSeconds(seconds - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [seconds]);
+
     return (
         <div style={containerStyle}>
             <Card.Root style={cardStyle}>
                 <div style={contentStyle}>
                     <div style={iconWrapperStyle}>
                         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="12" fill="#4CAF50"/>
-                            <path d="M7 13L10 16L17 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <circle cx="12" cy="12" r="12" fill="#4CAF50" />
+                            <path d="M7 13L10 16L17 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </div>
                     <Text typography="heading3" style={{ fontWeight: 800, marginTop: '24px' }}>결제가 완료되었습니다!</Text>
                     <Text typography="body1" color="text-secondary" style={{ marginTop: '12px', textAlign: 'center' }}>
                         주문하신 여행 상품 예약이 확정되었습니다.<br />
-                        예약 내역은 마이페이지에서 확인하실 수 있습니다.
+                        <span style={{ color: '#FF6F61', fontWeight: 700 }}>{seconds}</span>초 후 상세 예약 티켓 페이지로 이동합니다.
                     </Text>
 
                     <div style={buttonGroupStyle}>

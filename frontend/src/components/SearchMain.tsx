@@ -1,7 +1,8 @@
-import React from 'react';
-import Link from 'next/link';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from '../app/search/search.module.css';
 import SearchTourList from './SearchTourList';
+import { showAlert } from './AlertPortal';
 
 interface SearchMainProps {
     onDetailsClick: () => void;
@@ -9,7 +10,61 @@ interface SearchMainProps {
 }
 
 const SearchMain: React.FC<SearchMainProps> = ({ onDetailsClick, onSearchClick }) => {
+    const router = useRouter();
+    const [formData, setFormData] = useState({ name: '', email: '' });
     const cardStyleGrid = styles.cardGrid;
+
+    const validateForm = () => {
+        const { name, email } = formData;
+
+        // 1. 빈 필드 체크
+        if (!name.trim()) {
+            showAlert({
+                title: '입력 확인',
+                message: '\n성공적인 예약을 위해\n이름을 입력해주세요.',
+                type: 'warning'
+            });
+            return false;
+        }
+        if (!email.trim()) {
+            showAlert({
+                title: '입력 확인',
+                message: '\n예약 확인 메일을 받을\n이메일 주소를 입력해주세요.',
+                type: 'warning'
+            });
+            return false;
+        }
+
+        // 2. 이름 형식 체크 (한글 2자 이상 또는 영문 이름 형식)
+        const nameRegex = /^[가-힣]{2,10}$|^[a-zA-Z\s]{2,30}$/;
+        if (!nameRegex.test(name)) {
+            showAlert({
+                title: '형식 오류',
+                message: '\n올바른 이름 형식이 아닙니다.\n(한글 2~10자 또는 영문 2~30자)',
+                type: 'error'
+            });
+            return false;
+        }
+
+        // 3. 이메일 형식 체크
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showAlert({
+                title: '이메일 오류',
+                message: '\n유효한 이메일 주소를 입력해주세요.\n(예: example@travel.com)',
+                type: 'error'
+            });
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleBooking = () => {
+        if (validateForm()) {
+            router.push('/payment');
+        }
+    };
 
     return (
         <div style={{ width: '100%' }}>
@@ -31,8 +86,8 @@ const SearchMain: React.FC<SearchMainProps> = ({ onDetailsClick, onSearchClick }
                     <h2 className={styles.sectionTitle}>추천 여행 상품</h2>
                     <p className={styles.sectionSubtitle}>최고의 여행지를 확인해보세요!</p>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <div 
-                            className={styles.btnSolid} 
+                        <div
+                            className={styles.btnSolid}
                             style={{ width: 'auto', padding: '12px 24px', cursor: 'pointer' }}
                             onClick={onDetailsClick}
                         >
@@ -48,32 +103,39 @@ const SearchMain: React.FC<SearchMainProps> = ({ onDetailsClick, onSearchClick }
 
             {/* Booking Form Section */}
             <section className={styles.section}>
-                <div style={{ display: 'flex', gap: '60px', width: '100%', maxWidth: '1100px' }}>
-                    <div style={{ flex: 1 }}>
-                        <h2 className={styles.sectionTitle} style={{ textAlign: 'left' }}>여행 상품 예약</h2>
+                <div style={{ display: 'flex', gap: '80px', width: '100%', maxWidth: '1100px', alignItems: 'flex-start' }}>
+                    <div style={{ flex: '1', minWidth: '300px' }}>
+                        <h2 className={styles.sectionTitle} style={{ textAlign: 'left', wordBreak: 'keep-all' }}>여행 상품 예약 하기</h2>
                         <p className={styles.sectionSubtitle} style={{ textAlign: 'left' }}>원하는 여행 상품을 선택하고 예약을 진행하세요.</p>
                     </div>
                     <div className={styles.bookingForm}>
                         <div className={styles.inputGroup}>
-                            <label className={styles.label}>이름</label>
-                            <input className={styles.input} placeholder="이름을 입력하세요" />
+                            <label className={styles.label}>이름 (Name)</label>
+                            <input
+                                className={styles.input}
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="예: 홍길동 또는 Gildong Hong"
+                            />
                         </div>
                         <div className={styles.inputGroup}>
-                            <label className={styles.label}>이메일</label>
-                            <input className={styles.input} placeholder="이메일을 입력하세요" />
-                        </div>
-                        <div className={styles.inputGroup}>
-                            <label className={styles.label}>선택하시고 싶은 상품</label>
-                            <div className={styles.tagGroup}>
-                                {['장흥 해변 투어', '알프스 하이킹', '서울 야경 투어', '아이슬란드 오로라 투어'].map(tag => (
-                                    <div key={tag} className={styles.tag}>{tag}</div>
-                                ))}
-                            </div>
-                            <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>상품을 선택해주세요.</span>
+                            <label className={styles.label}>이메일 (Email)</label>
+                            <input
+                                className={styles.input}
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                placeholder="example@travel.com"
+                            />
                         </div>
                         <div className={styles.formButtons}>
-                            <div className={styles.btnCancel}>취소</div>
-                            <Link href="/payment" className={styles.btnSolid} style={{ textDecoration: 'none' }}>예약하기</Link>
+                            <div className={styles.btnCancel} onClick={() => setFormData({ name: '', email: '' })}>취소</div>
+                            <div
+                                className={styles.btnSubmit}
+                                onClick={handleBooking}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                예약하기
+                            </div>
                         </div>
                     </div>
                 </div>

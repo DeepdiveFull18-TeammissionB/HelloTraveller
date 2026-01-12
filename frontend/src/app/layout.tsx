@@ -5,6 +5,7 @@ import { OrderContextProvider } from "@/context/OrderContext";
 import { ThemeProvider } from "@vapor-ui/core";
 import Footer from "@/components/Footer";
 import GlobalHeader from "@/components/GlobalHeader";
+import { AlertPortal } from "@/components/AlertPortal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,6 +51,7 @@ export default function RootLayout({
               </main>
               <Footer />
             </div>
+            <AlertPortal />
           </ThemeProvider>
         </OrderContextProvider>
       </body>

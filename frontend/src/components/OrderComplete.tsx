@@ -10,7 +10,7 @@ interface OrderTicket {
 interface OrderCompleteProps {
     dDay?: number;
     tickets: OrderTicket[];
-    onBack?: () => void;
+    onViewOrders?: () => void;
 }
 
 /**
@@ -19,7 +19,7 @@ interface OrderCompleteProps {
 const OrderComplete: React.FC<OrderCompleteProps> = ({
     dDay = 1,
     tickets = [],
-    onBack
+    onViewOrders
 }) => {
     return (
         <div style={containerStyle}>
@@ -55,13 +55,13 @@ const OrderComplete: React.FC<OrderCompleteProps> = ({
                 ))}
             </div>
 
-            {/* 돌아가기 버튼 */}
+            {/* 내 예약 보기 버튼 */}
             <div style={footerStyle}>
                 <Button
-                    onClick={onBack}
+                    onClick={onViewOrders}
                     style={backButtonStyle}
                 >
-                    돌아가기
+                    내 예약 보기
                 </Button>
             </div>
         </div>

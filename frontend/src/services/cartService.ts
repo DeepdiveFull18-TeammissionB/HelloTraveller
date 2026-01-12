@@ -46,7 +46,7 @@ export const cartService = {
       const transformToMap = (entries: any[]) => {
         const newMap = new Map<string, ItemDetail>();
         entries.forEach(([name, value]) => {
-            newMap.set(name, value);
+          newMap.set(name, value);
         });
         return newMap;
       };
@@ -68,17 +68,55 @@ export const cartService = {
 
   placeOrder: (orderDetail: any): void => {
     try {
-      // 1. 기존에 저장된 주문 목록을 가져옵니다.
       const existingOrdersData = localStorage.getItem(ORDERS_KEY);
       const orders = existingOrdersData ? JSON.parse(existingOrdersData) : [];
 
-      // 2. 새 주문을 목록 맨 앞에 추가합니다.
-      orders.unshift(orderDetail);
+      // 주문 상태 기본값 추가
+      const orderWithStatus = {
+        ...orderDetail,
+        status: 'confirmed'
+      };
 
-      // 3. 다시 로컬스토리지에 저장합니다.
+      orders.unshift(orderWithStatus);
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
     } catch (error) {
       console.error("주문 저장 실패:", error);
+    }
+  },
+
+  /**
+   * 주문 상태 업데이트 (예: 예약 취소)
+   */
+  updateOrderStatus: (orderId: string, newStatus: 'confirmed' | 'canceled'): void => {
+    try {
+      const data = localStorage.getItem(ORDERS_KEY);
+      if (!data) return;
+
+      let orders = JSON.parse(data);
+      orders = orders.map((order: any) =>
+        order.orderId === orderId ? { ...order, status: newStatus } : order
+      );
+
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    } catch (error) {
+      console.error("주문 상태 업데이트 실패:", error);
+    }
+  },
+
+  /**
+   * 주문 내역 삭제 (영구 삭제)
+   */
+  deleteOrder: (orderId: string): void => {
+    try {
+      const data = localStorage.getItem(ORDERS_KEY);
+      if (!data) return;
+
+      let orders = JSON.parse(data);
+      orders = orders.filter((order: any) => order.orderId !== orderId);
+
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    } catch (error) {
+      console.error("주문 삭제 실패:", error);
     }
   },
 

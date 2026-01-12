@@ -21,9 +21,9 @@
       "description": "Good Portland"
     }
   ],
-  "options" : [
+  "options": [
     {
-      "name": "Insurance",
+      "name": "Insurance Upgrade",
       "description": "안전한 여행을 위해서!"
     },
     {

@@ -7,16 +7,16 @@ const SearchSidebar: React.FC<SearchSidebarProps> = ({ onCategorySelect, selecte
     return (
         <aside style={sidebarStyle}>
             {[
+                { icon: '✈️', label: '추천 여행' },
                 { icon: '🏖️', label: '해변 여행' },
                 { icon: '🏞️', label: '산악 여행' },
                 { icon: '🏙️', label: '도시 탐방' },
                 { icon: '🚴‍♂️', label: '모험 여행' },
-                { icon: '✈️', label: '추천 여행' },
             ].map((item, idx) => {
                 const isSelected = selectedCategory === item.label;
                 return (
-                    <div 
-                        key={idx} 
+                    <div
+                        key={idx}
                         style={{
                             ...sidebarItemStyle,
                             backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.05)' : 'transparent',

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Products from './Products';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 interface Item {
     name: string;
@@ -16,47 +17,64 @@ interface SearchTourListProps {
 
 const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isCompact = false }) => {
     const [items, setItems] = useState<Item[]>([]);
-
-    const handleUpdateCount = (name: string, count: string) => {
-    console.log(`${name} 상품 ${count}명 예약`);
-    // 상태 업데이트 로직 추가
-    };
+    const router = useRouter();
 
     const loadItems = async () => {
-            try {
-                // TODO: use category for filtering or API call
-                console.log('Selected Category:', category);
-                const response = await axios.get(`http://localhost:4000/products`);
-                setItems(response.data);
-            } catch (error) {
-                console.log(error);
-            }
-        };
+        try {
+            console.log('Selected Category:', category);
+            const response = await axios.get(`http://localhost:4000/products`);
+            setItems(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     useEffect(() => {
         loadItems();
     }, [category]);
-        
+
     const displayedItems = maxItems ? items.slice(0, maxItems) : items;
 
     return (
-        <div style={{ 
-            display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: '20px', 
-            padding: isCompact ? '10px 0' : '20px',
-            justifyContent: isCompact ? 'center' : 'flex-start'
-        }}>
-            {displayedItems.map((prod) => (
-                <Products
-                    key={prod.name}
-                    name={prod.name}
-                    imagePath={prod.imagePath}
-                    description={prod.description}
-                    updateItemCount={handleUpdateCount}
-                    width="250px"
-                />
-            ))}
+        <div style={{ padding: isCompact ? '10px 0' : '20px' }}>
+            <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '24px',
+                justifyContent: isCompact ? 'center' : 'flex-start'
+            }}>
+                {displayedItems.map((prod) => (
+                    <Products
+                        key={prod.name}
+                        name={prod.name}
+                        imagePath={prod.imagePath}
+                        description={prod.description}
+                        width="280px"
+                    />
+                ))}
+            </div>
+
+            {!isCompact && (
+                <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'center' }}>
+                    <button
+                        onClick={() => router.push('/payment')}
+                        style={{
+                            padding: '16px 40px',
+                            backgroundColor: '#4F46E5',
+                            color: 'white',
+                            borderRadius: '16px',
+                            fontWeight: 700,
+                            fontSize: '18px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            boxShadow: '0 10px 20px rgba(79, 70, 229, 0.3)',
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
+                        장바구니 및 결제 창으로 이동하기
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
