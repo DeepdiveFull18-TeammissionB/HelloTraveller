@@ -5,17 +5,18 @@ import { showAlert } from '../../common/AlertPortal';
 
 interface CartItem {
     name: string;
-    imagePath?: string;
+    imagePath: string;
     startDate?: string;
     endDate?: string;
     count: number;
     selectedOptions?: string[];
+    price: number;
     onCountChange?: (name: string, count: number) => void;
 }
 interface CartListProps {
     items: CartItem[];
     style?: React.CSSProperties;
-    onItemClick?: (item: any) => void;
+    onItemClick?: (item: CartItem) => void;
     selectedItemName?: string;
     onCountChange?: (name: string, count: number) => void;
     onRemove?: (name: string) => void;

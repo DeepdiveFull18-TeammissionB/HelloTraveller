@@ -45,13 +45,13 @@ const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isC
                 params: { lat: coords.lat, lon: coords.lon }
             });
 
-            let data = response.data;
+            let data: Item[] = response.data;
 
             // 핵심: 선택된 카테고리에 맞는 키워드로 필터링
             if (category !== '추천 여행') {
                 const keywords = categoryKeywords[category];
                 if (keywords) {
-                    data = data.filter((tour: any) => {
+                    data = data.filter((tour: Item) => {
                         const content = (tour.name + tour.description).toLowerCase();
                         // 키워드 중 하나라도 포함되어 있으면 유지
                         return keywords.some(kw => content.includes(kw));
@@ -89,9 +89,9 @@ const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isC
                 gap: '24px',
                 justifyContent: isCompact ? 'center' : 'flex-start'
             }}>
-                {displayedItems.map((prod) => (
+                {displayedItems.map((prod, index) => (
                     <Products
-                        key={prod.name}
+                        key={`${prod.name}-${index}`}
                         name={prod.name}
                         imagePath={prod.imagePath}
                         description={prod.description}

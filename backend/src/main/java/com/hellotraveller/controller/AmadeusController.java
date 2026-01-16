@@ -168,9 +168,15 @@ public class AmadeusController {
                     return item;
                 }).collect(Collectors.toList());
 
-        // 4. 캐시 저장
-        tourCache.put(cacheKey, new CacheEntry(result, now));
+        // 4. 데이터 섞기 및 15개 제한 (네트워크 전송량 최적화)
+        Collections.shuffle(result);
+        List<Map<String, Object>> limitedResult = result.stream()
+                .limit(15)
+                .collect(Collectors.toList());
 
-        return result;
+        // 5. 캐시 저장
+        tourCache.put(cacheKey, new CacheEntry(limitedResult, now));
+
+        return limitedResult;
     }
 }

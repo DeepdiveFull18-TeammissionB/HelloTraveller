@@ -1,13 +1,13 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { cartService } from '../../services/cartService';
+import { cartService, SavedOrder } from '../../services/cartService';
 import styles from './orders.module.css';
 import Link from 'next/link';
 import { Button, Text } from '@vapor-ui/core';
 import { showAlert } from '../../components/common/AlertPortal';
 
 export default function OrdersPage() {
-    const [orders, setOrders] = useState<any[]>([]);
+    const [orders, setOrders] = useState<SavedOrder[]>([]);
     const [loading, setLoading] = useState(true);
 
     const loadOrders = () => {
@@ -17,7 +17,10 @@ export default function OrdersPage() {
     };
 
     useEffect(() => {
-        loadOrders();
+        const timer = setTimeout(() => {
+            loadOrders();
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
     const handleCancelOrder = (orderId: string) => {
@@ -111,7 +114,7 @@ export default function OrdersPage() {
                                     </div>
                                     <div className={styles.infoGroup}>
                                         <span className={styles.infoLabel}>예약 일시</span>
-                                        <span className={styles.infoValue}>{order.orderDate}</span>
+                                        <span className={styles.infoValue}>{order.date}</span>
                                     </div>
                                 </div>
                                 <div className={styles.statusSection}>
@@ -148,7 +151,7 @@ export default function OrdersPage() {
 
                             {/* Order Items */}
                             <div className={styles.orderItems}>
-                                {order.items.map((item: any, itemIdx: number) => {
+                                {order.items.map((item, itemIdx) => {
                                     const isOption = item.type === 'option';
 
                                     // 옵션 아이콘 선택 함수
@@ -157,6 +160,7 @@ export default function OrdersPage() {
                                         if (lower.includes('insurance')) return '✨';
                                         if (lower.includes('dinner')) return '🍽️';
                                         if (lower.includes('firstclass')) return '✈️';
+                                        if (lower.includes('guide')) return '🧭';
                                         return '📦';
                                     };
 
@@ -171,10 +175,19 @@ export default function OrdersPage() {
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    fontSize: '40px'
+                                                    fontSize: '40px',
+                                                    borderRadius: '12px',
+                                                    overflow: 'hidden',
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    flexShrink: 0 // Prevent shrinking in long names
                                                 }}
                                             >
-                                                {!item.imagePath && isOption && <span>{getOptionEmoji(item.name)}</span>}
+                                                {!item.imagePath && isOption && (
+                                                    <span style={{ transition: 'transform 0.3s ease' }}>
+                                                        {getOptionEmoji(item.name)}
+                                                    </span>
+                                                )}
                                             </div>
                                             <div className={styles.itemContent}>
                                                 <h3 className={styles.itemName} style={{ color: isCanceled ? '#999' : 'inherit', display: 'flex', alignItems: 'center', gap: '8px' }}>

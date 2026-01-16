@@ -18,8 +18,8 @@ const Navbar = ({ title, links, showLogoCircle = true }: NavbarProps) => {
     const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
         if (pathname === href) {
             if (href === '/search') {
-                // 탐색 페이지에서는 단순 스크롤이 아니라 상태 리셋(첫 화면)을 위해 새로고침 수행
-                window.location.href = href;
+                router.push('/search');
+                router.refresh();
             } else {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -47,11 +47,11 @@ const Navbar = ({ title, links, showLogoCircle = true }: NavbarProps) => {
                     className={styles.logoText}
                     onClick={() => {
                         if (pathname.startsWith('/search')) {
-                            // 탐색 페이지에서는 해당 페이지 초기화 (메인으로)
-                            window.location.href = '/search';
+                            router.push('/search');
+                            router.refresh();
                         } else if (pathname.startsWith('/payment')) {
-                            // 결제 페이지에서는 해당 페이지 초기화 (메인으로)
-                            window.location.href = '/payment';
+                            router.push('/payment');
+                            router.refresh();
                         } else if (pathname === '/') {
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         } else {

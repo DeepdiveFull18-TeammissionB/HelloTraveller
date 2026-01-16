@@ -7,6 +7,20 @@ import { ItemDetail, OrderCounts } from "../types/order";
 const CART_KEY = "hello_traveler_cart";
 const ORDERS_KEY = "hello_traveler_orders";
 
+// 저장된 주문 데이터 인터페이스
+export interface SavedOrder {
+  orderId: string;
+  items: Array<ItemDetail & { name: string; type?: string }>;
+  date: string;
+  totalAmount: number;
+  status: 'confirmed' | 'canceled';
+  customerInfo?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+}
+
 export const cartService = {
   /**
    * 장바구니 저장: 객체 형태의 ItemDetail도 JSON.stringify가 자동으로 처리해줍니다.
@@ -33,7 +47,7 @@ export const cartService = {
 
       const parsed = JSON.parse(data);
 
-      const transformToMap = (entries: any[]) => {
+      const transformToMap = (entries: [string, ItemDetail][]) => {
         const newMap = new Map<string, ItemDetail>();
         entries.forEach(([name, value]) => {
           newMap.set(name, value);
@@ -56,13 +70,13 @@ export const cartService = {
     localStorage.removeItem(CART_KEY);
   },
 
-  placeOrder: (orderDetail: any): void => {
+  placeOrder: (orderDetail: Omit<SavedOrder, 'status'>): void => {
     try {
       const existingOrdersData = localStorage.getItem(ORDERS_KEY);
-      const orders = existingOrdersData ? JSON.parse(existingOrdersData) : [];
+      const orders: SavedOrder[] = existingOrdersData ? JSON.parse(existingOrdersData) : [];
 
       // 주문 상태 기본값 추가
-      const orderWithStatus = {
+      const orderWithStatus: SavedOrder = {
         ...orderDetail,
         status: 'confirmed'
       };
@@ -82,8 +96,8 @@ export const cartService = {
       const data = localStorage.getItem(ORDERS_KEY);
       if (!data) return;
 
-      let orders = JSON.parse(data);
-      orders = orders.map((order: any) =>
+      let orders: SavedOrder[] = JSON.parse(data);
+      orders = orders.map((order) =>
         order.orderId === orderId ? { ...order, status: newStatus } : order
       );
 
@@ -101,8 +115,8 @@ export const cartService = {
       const data = localStorage.getItem(ORDERS_KEY);
       if (!data) return;
 
-      let orders = JSON.parse(data);
-      orders = orders.filter((order: any) => order.orderId !== orderId);
+      let orders: SavedOrder[] = JSON.parse(data);
+      orders = orders.filter((order) => order.orderId !== orderId);
 
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
     } catch (error) {
@@ -113,7 +127,7 @@ export const cartService = {
   /**
    * 주문 목록 불러오기
    */
-  getOrders: (): any[] => {
+  getOrders: (): SavedOrder[] => {
     try {
       const data = localStorage.getItem(ORDERS_KEY);
       return data ? JSON.parse(data) : [];

@@ -27,6 +27,7 @@ const Options: React.FC<OptionsProps> = ({ name, description, price, checked = f
         if (lowerName.includes('insurance')) return '✨';
         if (lowerName.includes('dinner')) return '🍽️';
         if (lowerName.includes('firstclass')) return '✈️';
+        if (lowerName.includes('guide')) return '🧭';
         return '✨';
     };
 

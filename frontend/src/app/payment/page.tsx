@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useContext, useEffect } from 'react';
+import { OrderItem } from '../../types/order';
 import OrderContext from '../../context/OrderContext';
 import Link from 'next/link';
 import styles from './payment.module.css';
@@ -21,7 +22,7 @@ type PaymentStep = 'cart' | 'processing' | 'completed'; // processing 단계 추
 export default function PaymentPage() {
     const router = useRouter();
     const [step, setStep] = useState<PaymentStep>('cart');
-    const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [completedOrder, setCompletedOrder] = useState<{ id: string, amount: number } | null>(null);
 
@@ -29,7 +30,11 @@ export default function PaymentPage() {
 
     useEffect(() => {
         if (context && context[0].productItems.length > 0 && !selectedItem) {
-            setSelectedItem(context[0].productItems[0]);
+            const firstItem = context[0].productItems[0];
+            const timer = setTimeout(() => {
+                setSelectedItem(firstItem);
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [context, selectedItem]);
 
@@ -61,7 +66,7 @@ export default function PaymentPage() {
 
             const newOrder = {
                 orderId: orderId,
-                orderDate: new Date().toLocaleString(),
+                date: new Date().toLocaleString(),
                 items: [
                     ...orderData.productItems.map(item => ({ ...item, type: 'tour' })),
                     ...orderData.optionItems.map(item => ({ ...item, type: 'option' }))

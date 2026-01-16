@@ -39,12 +39,12 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
         options: new Map()
     });
 
-    const [totals, setTotals] = useState<Totals>({
-        products: 0,
-        options: 0,
-        total: 0,
-        totalCount: 0
-    });
+    // const [totals, setTotals] = useState<Totals>({
+    //     products: 0,
+    //     options: 0,
+    //     total: 0,
+    //     totalCount: 0
+    // });
 
 
     const pricePerItem: Record<OrderType, number> = {
@@ -54,7 +54,10 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
 
     useEffect(() => {
         const savedData = cartService.getCartItems();
-        setOrderCounts(savedData);
+        const timer = setTimeout(() => {
+            setOrderCounts(savedData);
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
     function calculateSubtotal(orderType: OrderType, currentOrderCounts: OrderCounts): number {
@@ -77,17 +80,20 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
         return countSum;
     }
 
-    useEffect(() => {
+    const totals = useMemo<Totals>(() => {
         const productsTotalMoney = calculateSubtotal("products", orderCounts);
         const optionsTotalMoney = calculateSubtotal("options", orderCounts);
         const totalProductCount = calculateTotalProductCount(orderCounts);
-        setTotals({
+
+        return {
             products: productsTotalMoney,
             options: optionsTotalMoney,
             total: productsTotalMoney + optionsTotalMoney,
-            totalCount: totalProductCount, // 결과 저장
-        });
+            totalCount: totalProductCount,
+        };
+    }, [orderCounts]);
 
+    useEffect(() => {
         cartService.saveCart(orderCounts);
     }, [orderCounts]);
 

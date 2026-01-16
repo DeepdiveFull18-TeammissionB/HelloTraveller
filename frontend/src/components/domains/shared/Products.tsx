@@ -340,7 +340,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price
                                         value={String(personCount)}
                                         min="1"
                                         placeholder="인원 수를 입력하세요"
-                                        onChange={handleChange as any}
+                                        onChange={handleChange}
                                         style={{
                                             borderRadius: '12px',
                                             width: '100%',

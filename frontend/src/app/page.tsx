@@ -5,12 +5,11 @@ import Type from '@/components/domains/shared/Type';
 import OrderContext from '@/context/OrderContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
 export default function Home() {
+  const router = useRouter();
   const context = useContext(OrderContext);
   if (!context) return null;
   const [orderData] = context;
-  const router = useRouter();
 
   return (
     <div className={styles.container}>
@@ -83,17 +82,20 @@ export default function Home() {
             {
               title: '여행자 보험',
               sub: '안전한 여행',
-              icon: '🛡️'
+              icon: '🛡️',
+              price: '10,000원'
             },
             {
               title: '식사권 포함',
               sub: '맛있는 저녁',
-              icon: '🍽️'
+              icon: '🍽️',
+              price: '30,000원'
             },
             {
               title: '좌석 업그레이드',
               sub: '더 편안한 여행',
-              icon: '✈️'
+              icon: '✈️',
+              price: '50,000원'
             }
           ].map((option, idx) => (
             <div key={idx} className={styles.optionItem}>

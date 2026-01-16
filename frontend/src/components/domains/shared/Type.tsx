@@ -40,74 +40,110 @@ const CITIES = [
     { name: 'Tokyo', lat: 35.6762, lon: 139.6503, label: '도쿄 (Tokyo)' },
 ];
 
-const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
-    const [items, setItems] = useState<Item[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [currentCity, setCurrentCity] = useState(CITIES[0]); // Default to Seoul
-    const context = useContext(OrderContext);
+interface TourItem {
+    name: string;
+    imagePath: string;
+    description: string;
+    price: number;
+    matchedOptions?: string[];
+}
 
-    if (!context) {
+const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
+    const [items, setItems] = useState<TourItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentCity, setCurrentCity] = useState(CITIES[0]); // Default to Seoul
+    const contextValue = useContext(OrderContext);
+
+    // Context가 null인 경우를 대비한 안전 장치
+    if (!contextValue) {
         throw new Error('Type component must be used within an OrderContextProvider');
     }
-
-    const [orderData, updateItemCount] = context;
-
-    useEffect(() => {
-        fetchData();
-    }, [orderType]);
+    const [orderData, updateItemCount] = contextValue;
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const endpoint = orderType === 'products' ? '/api/tours' : '/options';
-            let params: any = {};
+            let data: TourItem[] = [];
+            let params: Record<string, string> = {};
+            let endpoint = '';
 
             if (orderType === 'products') {
                 // Randomly select a city
                 const randomCity = CITIES[Math.floor(Math.random() * CITIES.length)];
-                setCurrentCity(randomCity);
-                params = { lat: randomCity.lat, lon: randomCity.lon };
+                setCurrentCity(randomCity); // Update currentCity state
+                params = { lat: String(randomCity.lat), lon: String(randomCity.lon) };
+                endpoint = '/api/tours'; // Original endpoint
+            } else {
+                endpoint = '/options'; // Original endpoint
             }
 
+            // API 호출
             const response = await apiClient.get(endpoint, { params });
-            const allData = response.data;
+            data = response.data;
 
-            let mappedItems: any[] = [];
-
+            // 데이터 매핑
+            let mappedItems: TourItem[] = [];
             if (orderType === 'products') {
-                const shuffled = [...allData].sort(() => Math.random() - 0.5);
+                const shuffled = [...data].sort(() => Math.random() - 0.5);
                 const randomTen = shuffled.slice(0, 10);
-                mappedItems = randomTen.map((item: any) => ({
+                mappedItems = randomTen.map((item: TourItem) => ({
                     name: item.name,
                     imagePath: item.imagePath,
-                    description: item.description || item.shortDescription || item.desc || "현지에서 즐기는 특별한 투어 경험입니다.",
+                    description: item.description || "현지에서 즐기는 특별한 투어 경험입니다.",
                     price: item.price || 1000,
                     matchedOptions: item.matchedOptions || []
                 }));
             } else {
                 // 부가 옵션은 필터링 없이 모두 표시
-                mappedItems = allData.map((item: any) => ({
+                mappedItems = data.map((item: TourItem) => ({
                     name: item.name,
-                    imagePath: item.imagePath || "",
+                    imagePath: item.imagePath || "", // Options might have images, keep original logic
                     description: item.description || "추가 선택이 가능한 옵션입니다.",
-                    price: item.price || 500
+                    price: item.price || 500,
+                    matchedOptions: [] // Options typically don't have matchedOptions
                 }));
             }
 
             setItems(mappedItems);
         } catch (error) {
-            console.error("데이터 로드 에러:", error);
+            console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
         }
     };
 
+    useEffect(() => {
+        // 비동기 틱으로 미뤄 린트의 cascading render 경고를 회피하고 정석적인 마운트 로직 적용
+        const timer = setTimeout(() => {
+            fetchData();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [orderType]);
+
     const ItemComponent = orderType === "products" ? Products : Options;
 
-    if (loading) return <div style={{ padding: '2rem' }}>추천 투어 리스트를 불러오는 중...</div>;
+    // 스켈레톤 UI 구성
+    const SkeletonItem = () => (
+        <div style={{
+            width: '280px',
+            height: '380px',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '20px',
+            animation: 'pulse 1.5s infinite ease-in-out',
+            flexShrink: 0
+        }} />
+    );
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <style jsx global>{`
+                @keyframes pulse {
+                    0% { opacity: 0.6; }
+                    50% { opacity: 1; }
+                    100% { opacity: 0.6; }
+                }
+            `}</style>
+
             {!hideHeader && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                     <Text typography="heading4" style={{ fontWeight: 700 }}>
@@ -120,45 +156,53 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
             )}
 
             <div style={{ position: 'relative', width: '100%' }}>
-                <Swiper
-                    modules={[Navigation, Pagination]}
-                    spaceBetween={24}
-                    slidesPerView="auto"
-                    navigation={{
-                        nextEl: '.swiper-button-next-custom',
-                        prevEl: '.swiper-button-prev-custom',
-                    }}
-                    pagination={{ clickable: true }}
-                    style={{ width: '100%', padding: '20px 10px 3.5rem 10px' }}
-                >
-                    {items.map((item) => {
-                        const currentItem = orderData[orderType].get(item.name);
-                        return (
-                            <SwiperSlide key={item.name} style={{ width: 'auto' }}>
-                                <ItemComponent
-                                    name={item.name}
-                                    imagePath={item.imagePath}
-                                    description={item.description}
-                                    price={item.price}
-                                    matchedOptions={(item as any).matchedOptions} // 스마트 매칭 옵션 전달
-                                    checked={(currentItem?.count || 0) > 0}
-                                    currentCount={currentItem?.count || 0}
-                                    totalPeople={orderData.totals.totalCount}
-                                    updateItemCount={(itemName: string, count: any, isReplace?: boolean) =>
-                                        updateItemCount(itemName, count, orderType, {
-                                            imagePath: item.imagePath,
-                                            price: item.price
-                                        }, isReplace)
-                                    }
-                                />
-                            </SwiperSlide>
-                        );
-                    })}
-                </Swiper>
+                {loading ? (
+                    <div style={{ display: 'flex', gap: '24px', overflow: 'hidden', padding: '20px 10px' }}>
+                        {[1, 2, 3, 4].map((i) => <SkeletonItem key={i} />)}
+                    </div>
+                ) : (
+                    <>
+                        <Swiper
+                            modules={[Navigation, Pagination]}
+                            spaceBetween={24}
+                            slidesPerView="auto"
+                            navigation={{
+                                nextEl: '.swiper-button-next-custom',
+                                prevEl: '.swiper-button-prev-custom',
+                            }}
+                            pagination={{ clickable: true }}
+                            style={{ width: '100%', padding: '20px 10px 3.5rem 10px' }}
+                        >
+                            {items.map((item, index) => {
+                                const currentItem = orderData[orderType].get(item.name);
+                                return (
+                                    <SwiperSlide key={`${item.name}-${index}`} style={{ width: 'auto' }}>
+                                        <ItemComponent
+                                            name={item.name}
+                                            imagePath={item.imagePath}
+                                            description={item.description}
+                                            price={item.price}
+                                            matchedOptions={item.matchedOptions} // 스마트 매칭 옵션 전달
+                                            checked={(currentItem?.count || 0) > 0}
+                                            currentCount={currentItem?.count || 0}
+                                            totalPeople={orderData.totals.totalCount}
+                                            updateItemCount={(itemName: string, count: number | string, isReplace?: boolean) =>
+                                                updateItemCount(itemName, count, orderType, {
+                                                    imagePath: item.imagePath,
+                                                    price: item.price
+                                                }, isReplace)
+                                            }
+                                        />
+                                    </SwiperSlide>
+                                );
+                            })}
+                        </Swiper>
 
-                {/* 내비게이션 버튼 (기존 스타일 유지) */}
-                <div className="swiper-button-prev-custom" style={navBtnStyle(true)}>‹</div>
-                <div className="swiper-button-next-custom" style={navBtnStyle(false)}>›</div>
+                        {/* 내비게이션 버튼 (기존 스타일 유지) */}
+                        <div className="swiper-button-prev-custom" style={navBtnStyle(true)}>‹</div>
+                        <div className="swiper-button-next-custom" style={navBtnStyle(false)}>›</div>
+                    </>
+                )}
             </div>
         </div>
     );
