@@ -26,7 +26,6 @@ interface ProductsProps {
     matchedOptions?: string[]; // 스마트 매칭된 옵션 리스트
 }
 
-const allOptions = ['현지 가이드 동행', '교통비 포함', '전용 보트 서비스', '중식 및 생수 제공', '입장료 전부 포함', '여행자 보험'];
 
 /**
  * 여행 상품 컴포넌트

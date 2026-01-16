@@ -1,15 +1,11 @@
 "use client";
-import React, { useContext } from 'react';
+import React from 'react';
 import styles from './page.module.css';
 import Type from '@/components/domains/shared/Type';
-import OrderContext from '@/context/OrderContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 export default function Home() {
   const router = useRouter();
-  const context = useContext(OrderContext);
-  if (!context) return null;
-  const [orderData] = context;
 
   return (
     <div className={styles.container}>

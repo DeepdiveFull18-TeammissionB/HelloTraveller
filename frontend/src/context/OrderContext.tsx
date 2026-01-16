@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useMemo, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useMemo, useState, useEffect, ReactNode, useCallback } from "react";
 import { cartService } from "../services/cartService";
 import { OrderData, OrderCounts, Totals, OrderType, ItemDetail, OrderItem } from "../types/order";
 
@@ -60,7 +60,7 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
         return () => clearTimeout(timer);
     }, []);
 
-    function calculateSubtotal(orderType: OrderType, currentOrderCounts: OrderCounts): number {
+    const calculateSubtotal = useCallback((orderType: OrderType, currentOrderCounts: OrderCounts): number => {
         let total = 0;
         const itemsMap = currentOrderCounts[orderType];
         for (const item of itemsMap.values()) {
@@ -68,17 +68,17 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
             total += item.count * price;
         }
         return total;
-    }
+    }, []);
 
     // 수량 합계(totalCount)를 구하는 함수
-    function calculateTotalProductCount(currentOrderCounts: OrderCounts): number {
+    const calculateTotalProductCount = useCallback((currentOrderCounts: OrderCounts): number => {
         let countSum = 0;
         // options는 제외하고 products만 순회
         for (const item of currentOrderCounts.products.values()) {
             countSum += item.count;
         }
         return countSum;
-    }
+    }, []);
 
     const totals = useMemo<Totals>(() => {
         const productsTotalMoney = calculateSubtotal("products", orderCounts);
@@ -91,7 +91,7 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
             total: productsTotalMoney + optionsTotalMoney,
             totalCount: totalProductCount,
         };
-    }, [orderCounts]);
+    }, [orderCounts, calculateSubtotal, calculateTotalProductCount]);
 
     useEffect(() => {
         cartService.saveCart(orderCounts);
@@ -102,7 +102,7 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
         // Array로 미리 변환하는 함수
         const mapToArray = (map: Map<string, ItemDetail>): OrderItem[] => {
             return Array.from(map.entries())
-                .filter(([_, item]) => item.count > 0)
+                .filter(([, item]) => item.count > 0)
                 .map(([name, item]) => ({
                     name,
                     ...item

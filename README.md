@@ -58,7 +58,7 @@ Amadeus API를 활용한 실시간 투어 정보 제공, 사용자 위치 기반
 cd backend
 ./mvnw spring-boot:run
 ```
-* 서버는 `http://localhost:8080` 포트에서 실행됩니다. (Amadeus API 키 설정 필요)
+* 서버는 `http://localhost:4000` 포트에서 실행됩니다. (Amadeus API 키 설정 필요)
 
 ### 2. Frontend 실행 (Next.js)
 ```bash

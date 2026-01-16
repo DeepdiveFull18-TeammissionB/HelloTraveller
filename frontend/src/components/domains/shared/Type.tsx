@@ -1,29 +1,17 @@
+import React from 'react';
 "use client";
-import React, { useContext, useEffect, useState } from 'react';
-import axios from 'axios';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import OrderContext from '@/context/OrderContext';
 import {
     Text
 } from '@vapor-ui/core';
 import Products from './Products';
 import Options from './Options';
-import OrderContext from '../../../context/OrderContext';
 import { OrderType } from '../../../types/order';
-
-interface Item {
-    name: string;
-    imagePath: string;
-    description?: string;
-    price: number;
-}
-
-interface TypeProps {
-    orderType: OrderType;
-    hideHeader?: boolean;
-}
+import apiClient from '../../../services/apiClient';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
-import apiClient from '../../../services/apiClient';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -48,19 +36,23 @@ interface TourItem {
     matchedOptions?: string[];
 }
 
+interface TypeProps {
+    orderType: OrderType;
+    hideHeader?: boolean;
+}
+
 const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
     const [items, setItems] = useState<TourItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentCity, setCurrentCity] = useState(CITIES[0]); // Default to Seoul
+    const [currentCity, setCurrentCity] = useState(CITIES[0]);
     const contextValue = useContext(OrderContext);
 
-    // Context가 null인 경우를 대비한 안전 장치
     if (!contextValue) {
         throw new Error('Type component must be used within an OrderContextProvider');
     }
     const [orderData, updateItemCount] = contextValue;
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             let data: TourItem[] = [];
@@ -68,20 +60,17 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
             let endpoint = '';
 
             if (orderType === 'products') {
-                // Randomly select a city
                 const randomCity = CITIES[Math.floor(Math.random() * CITIES.length)];
-                setCurrentCity(randomCity); // Update currentCity state
+                setCurrentCity(randomCity);
                 params = { lat: String(randomCity.lat), lon: String(randomCity.lon) };
-                endpoint = '/api/tours'; // Original endpoint
+                endpoint = '/api/tours';
             } else {
-                endpoint = '/options'; // Original endpoint
+                endpoint = '/options';
             }
 
-            // API 호출
             const response = await apiClient.get(endpoint, { params });
             data = response.data;
 
-            // 데이터 매핑
             let mappedItems: TourItem[] = [];
             if (orderType === 'products') {
                 const shuffled = [...data].sort(() => Math.random() - 0.5);
@@ -94,13 +83,12 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
                     matchedOptions: item.matchedOptions || []
                 }));
             } else {
-                // 부가 옵션은 필터링 없이 모두 표시
                 mappedItems = data.map((item: TourItem) => ({
                     name: item.name,
-                    imagePath: item.imagePath || "", // Options might have images, keep original logic
+                    imagePath: item.imagePath || "",
                     description: item.description || "추가 선택이 가능한 옵션입니다.",
                     price: item.price || 500,
-                    matchedOptions: [] // Options typically don't have matchedOptions
+                    matchedOptions: []
                 }));
             }
 
@@ -110,33 +98,20 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [orderType]);
 
     useEffect(() => {
-        // 비동기 틱으로 미뤄 린트의 cascading render 경고를 회피하고 정석적인 마운트 로직 적용
         const timer = setTimeout(() => {
             fetchData();
         }, 0);
         return () => clearTimeout(timer);
-    }, [orderType]);
+    }, [fetchData]);
 
     const ItemComponent = orderType === "products" ? Products : Options;
 
-    // 스켈레톤 UI 구성
-    const SkeletonItem = () => (
-        <div style={{
-            width: '280px',
-            height: '380px',
-            backgroundColor: '#f5f5f5',
-            borderRadius: '20px',
-            animation: 'pulse 1.5s infinite ease-in-out',
-            flexShrink: 0
-        }} />
-    );
-
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <style jsx global>{`
+            <style>{`
                 @keyframes pulse {
                     0% { opacity: 0.6; }
                     50% { opacity: 1; }
@@ -182,7 +157,7 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
                                             imagePath={item.imagePath}
                                             description={item.description}
                                             price={item.price}
-                                            matchedOptions={item.matchedOptions} // 스마트 매칭 옵션 전달
+                                            matchedOptions={item.matchedOptions}
                                             checked={(currentItem?.count || 0) > 0}
                                             currentCount={currentItem?.count || 0}
                                             totalPeople={orderData.totals.totalCount}
@@ -198,7 +173,6 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
                             })}
                         </Swiper>
 
-                        {/* 내비게이션 버튼 (기존 스타일 유지) */}
                         <div className="swiper-button-prev-custom" style={navBtnStyle(true)}>‹</div>
                         <div className="swiper-button-next-custom" style={navBtnStyle(false)}>›</div>
                     </>
@@ -207,6 +181,18 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
         </div>
     );
 };
+
+// 스켈레톤 UI 구성 (컴포넌트 외부에 선언하여 린트 에러 방지 및 최적화)
+const SkeletonItem = () => (
+    <div style={{
+        width: '280px',
+        height: '380px',
+        backgroundColor: '#f5f5f5',
+        borderRadius: '20px',
+        animation: 'pulse 1.5s infinite ease-in-out',
+        flexShrink: 0
+    }} />
+);
 
 const navBtnStyle = (isLeft: boolean): React.CSSProperties => ({
     position: 'absolute',

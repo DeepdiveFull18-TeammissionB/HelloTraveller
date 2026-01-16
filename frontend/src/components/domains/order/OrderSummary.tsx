@@ -65,7 +65,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
 
                 {/* 총 합계 (이미지 0 & 1 구성) */}
                 <div style={totalLabelRowStyle}>
-                    <Text typography="heading5" style={{ fontWeight: 700 }}>총 합계:</Text>
+                    <Text typography="heading5" style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>총 합계:</Text>
                     <div style={totalValueAreaStyle}>
                         <Text typography="heading1" style={totalValueTextStyle}>
                             {totalAmount.toLocaleString()}
@@ -108,7 +108,7 @@ const summaryCardStyle: React.CSSProperties = {
     background: '#fff',
     border: '1px solid #eee',
     boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-    width: '50%'
+    width: '100%'
 };
 
 const contentWrapperStyle: React.CSSProperties = {

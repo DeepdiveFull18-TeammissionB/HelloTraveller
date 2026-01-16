@@ -1,6 +1,5 @@
 "use client";
 import React from 'react';
-import Link from 'next/link';
 import styles from './search.module.css';
 import SearchSidebar from '@/components/domains/search/SearchSidebar';
 import SearchMain from '@/components/domains/search/SearchMain';
@@ -32,5 +31,3 @@ export default function SearchPage() {
         </div>
     );
 }
-
-const cardStyleGrid = styles.cardGrid; // Fix for reference if needed

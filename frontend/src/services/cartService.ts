@@ -47,9 +47,10 @@ export const cartService = {
 
       const parsed = JSON.parse(data);
 
-      const transformToMap = (entries: [string, ItemDetail][]) => {
+      const transformToMap = (entries: [string, ItemDetail][]): Map<string, ItemDetail> => {
         const newMap = new Map<string, ItemDetail>();
-        entries.forEach(([name, value]) => {
+        // Filter out items with count <= 0 when loading the cart
+        entries.filter(([, item]) => item.count > 0).forEach(([name, value]) => {
           newMap.set(name, value);
         });
         return newMap;
@@ -131,7 +132,7 @@ export const cartService = {
     try {
       const data = localStorage.getItem(ORDERS_KEY);
       return data ? JSON.parse(data) : [];
-    } catch (error) {
+    } catch {
       return [];
     }
   }

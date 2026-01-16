@@ -24,7 +24,6 @@ const categoryCoordinates: Record<string, { lat: number; lon: number }> = {
     '모험 여행': { lat: -33.8688, lon: 151.2093 },  // 시드니
 };
 
-// 카테고리별 검색 키워드 설정 (이 단어들이 포함되면 해당 카테고리로 분류)
 const categoryKeywords: Record<string, string[]> = {
     '해변 여행': ['beach', 'sea', 'ocean', 'boat', 'water', 'snorkeling', 'island', 'cruise'],
     '산악 여행': ['mountain', 'hiking', 'nature', 'trekking', 'park', 'forest', 'climbing'],
@@ -35,51 +34,54 @@ const categoryKeywords: Record<string, string[]> = {
 const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isCompact = false }) => {
     const router = useRouter();
     const [items, setItems] = useState<Item[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-
-    const loadItems = async () => {
-        setLoading(true);
-        try {
-            const coords = categoryCoordinates[category] || categoryCoordinates['추천 여행'];
-            const response = await apiClient.get('/api/tours', {
-                params: { lat: coords.lat, lon: coords.lon }
-            });
-
-            let data: Item[] = response.data;
-
-            // 핵심: 선택된 카테고리에 맞는 키워드로 필터링
-            if (category !== '추천 여행') {
-                const keywords = categoryKeywords[category];
-                if (keywords) {
-                    data = data.filter((tour: Item) => {
-                        const content = (tour.name + tour.description).toLowerCase();
-                        // 키워드 중 하나라도 포함되어 있으면 유지
-                        return keywords.some(kw => content.includes(kw));
-                    });
-                }
-            }
-
-            // 만약 필터링 후 데이터가 너무 적으면 전체에서 랜덤으로 보여줌 (Fallback)
-            if (data.length < 2) {
-                data = response.data;
-            }
-
-            // 랜덤 섞기 및 10개 추출
-            const shuffled = [...data].sort(() => Math.random() - 0.5);
-            setItems(shuffled.slice(0, maxItems || 10));
-
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
-        loadItems();
-    }, [category]);
+        let isMounted = true;
 
-    const displayedItems = maxItems ? items.slice(0, maxItems) : items;
+        const load = async () => {
+            try {
+                const coords = categoryCoordinates[category] || categoryCoordinates['추천 여행'];
+                const response = await apiClient.get('/api/tours', {
+                    params: { lat: coords.lat, lon: coords.lon }
+                });
+
+                if (!isMounted) return;
+
+                let data: Item[] = response.data;
+
+                if (category !== '추천 여행') {
+                    const keywords = categoryKeywords[category];
+                    if (keywords) {
+                        data = data.filter((tour: Item) => {
+                            const content = (tour.name + tour.description).toLowerCase();
+                            return keywords.some(kw => content.includes(kw));
+                        });
+                    }
+                }
+
+                if (data.length < 2) {
+                    data = response.data;
+                }
+
+                const shuffled = [...data].sort(() => Math.random() - 0.5);
+                setItems(shuffled.slice(0, maxItems || 10));
+
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        const timer = setTimeout(() => {
+            load();
+        }, 0);
+
+        return () => {
+            isMounted = false;
+            clearTimeout(timer);
+        };
+    }, [category, maxItems]);
+
+    const displayedItems = items;
 
     return (
         <div style={{ padding: isCompact ? '10px 0' : '20px' }}>

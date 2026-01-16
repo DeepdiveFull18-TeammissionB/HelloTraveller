@@ -5,8 +5,8 @@ import Options from '../domains/shared/Options'
 
 // Mock Swiper components
 jest.mock('swiper/react', () => ({
-    Swiper: ({ children }: any) => <div data-testid="swiper-mock">{children}</div>,
-    SwiperSlide: ({ children }: any) => <div data-testid="swiper-slide-mock">{children}</div>,
+    Swiper: ({ children }: { children: React.ReactNode }) => <div data-testid="swiper-mock">{children}</div>,
+    SwiperSlide: ({ children }: { children: React.ReactNode }) => <div data-testid="swiper-slide-mock">{children}</div>,
 }));
 
 jest.mock('swiper', () => ({

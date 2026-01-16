@@ -42,8 +42,6 @@ export default function PaymentPage() {
 
     const [orderData, updateItemCount, resetCart, removeItem] = context;
 
-    const isCartEmpty = orderData.productItems.length === 0;
-
     const handleOrder = async () => {
         if (!isConfirmed) {
             showAlert({

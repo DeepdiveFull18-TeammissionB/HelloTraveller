@@ -1,13 +1,10 @@
 "use client";
 import React from 'react';
-import SummaryPage from '@/components/SummaryPage';
-import Type from '@/components/Type';
-import Header from '@/components/Header';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import OrderSummary from '@/components/OrderSummary';
-import CartList from '@/components/CartList';
-import OrderComplete from '@/components/OrderComplete';
+import SummaryPage from '@/components/domains/order/SummaryPage';
+import Type from '@/components/domains/shared/Type';
+import OrderSummary from '@/components/domains/order/OrderSummary';
+import CartList from '@/components/domains/order/CartList';
+import OrderComplete from '@/components/common/OrderComplete';
 
 /**
  * 컴포넌트 갤러리 페이지
@@ -26,7 +23,7 @@ export default function ComponentGallery() {
                     <div style={badgeStyle}>New Component</div>
                     <h2 style={sectionTitleStyle}>1. Order Summary</h2>
                     <p style={descriptionStyle}>이미지 0 & 1에 나타난 결제 요약 정보와 주문 확인 체크박스가 포함된 컴포넌트입니다.</p>
-                    <div style={{ maxWidth: '400px' }}>
+                    <div style={{ maxWidth: '440px' }}>
                         <OrderSummary
                             guestCount={6}
                             productAmount={6000}
@@ -44,9 +41,9 @@ export default function ComponentGallery() {
                     <div style={previewBoxStyle}>
                         <CartList
                             items={[
-                                { name: 'Poland 투어', date: '2026.01.07', count: 2, options: ['생수 제공', '가이드 및 설명 제공'] },
-                                { name: 'Poland 투어', date: '2026.01.07', count: 2, options: ['생수 제공', '가이드 및 설명 제공'] },
-                                { name: 'Poland 투어', date: '2026.01.07', count: 2, options: ['생수 제공', '가이드 및 설명 제공'] }
+                                { name: 'Poland 투어', startDate: '2026.01.07', count: 2, selectedOptions: ['생수 제공', '가이드 및 설명 제공'], imagePath: '', price: 1000 },
+                                { name: 'Poland 투어', startDate: '2026.01.07', count: 2, selectedOptions: ['생수 제공', '가이드 및 설명 제공'], imagePath: '', price: 1000 },
+                                { name: 'Poland 투어', startDate: '2026.01.07', count: 2, selectedOptions: ['생수 제공', '가이드 및 설명 제공'], imagePath: '', price: 1000 }
                             ]}
                         />
                     </div>
