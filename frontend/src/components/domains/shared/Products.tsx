@@ -131,8 +131,34 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                     <Card.Body style={{ padding: '16px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <div>
-                                <Text typography="heading6" style={{ fontWeight: 800, color: '#1a1a1a', display: 'block' }}>{name}</Text>
-                                <Text typography="body3" style={{ color: '#666', marginTop: '2px', display: 'block', fontSize: '11px', lineHeight: 1.4 }}>{description || '멋진 추억을 만들어줄 투어.'}</Text>
+                                <Text 
+                                    typography="heading6" 
+                                    style={{ 
+                                        fontWeight: 800, 
+                                        color: '#1a1a1a',
+                                        display: '-webkit-box',
+                                        WebkitBoxOrient: 'vertical',
+                                        WebkitLineClamp: 2, // 보여주고 싶은 줄 수
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        height: '50px'
+                                    }}
+                                >{name}</Text>
+                                <Text 
+                                    typography="body3" 
+                                    style={{ 
+                                        color: '#666', 
+                                        marginTop: '2px', 
+                                        fontSize: '11px', 
+                                        lineHeight: 1.4,
+                                        display: '-webkit-box',
+                                        WebkitBoxOrient: 'vertical',
+                                        WebkitLineClamp: 2, // 보여주고 싶은 줄 수
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        height: '30px'
+                                    }}
+                                >{description || '멋진 추억을 만들어줄 투어.'}</Text>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
                                 <div>
