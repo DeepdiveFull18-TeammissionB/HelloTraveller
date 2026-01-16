@@ -83,19 +83,16 @@ export default function Home() {
             {
               title: '여행자 보험',
               sub: '안전한 여행',
-              price: '$10 추가',
               icon: '🛡️'
             },
             {
               title: '식사권 포함',
               sub: '맛있는 저녁',
-              price: '$20 추가',
               icon: '🍽️'
             },
             {
               title: '좌석 업그레이드',
               sub: '더 편안한 여행',
-              price: '$15 추가',
               icon: '✈️'
             }
           ].map((option, idx) => (
@@ -122,21 +119,33 @@ export default function Home() {
         <div className={styles.reviewGrid}>
           <div className={styles.reviewCard}>
             <div className={styles.reviewUser}>
-              <div className={styles.userAvatar}></div>
+              <div className={styles.userAvatar} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '20px', height: '20px', color: '#9CA3AF' }}>
+                  <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+                </svg>
+              </div>
               <span className={styles.userName}>김지연</span>
             </div>
             <p className={styles.reviewText}>정말 쉽고 빠르게 예약할 수 있었습니다! 최고의 경험!</p>
           </div>
           <div className={styles.reviewCard}>
             <div className={styles.reviewUser}>
-              <div className={styles.userAvatar}></div>
+              <div className={styles.userAvatar} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '20px', height: '20px', color: '#9CA3AF' }}>
+                  <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+                </svg>
+              </div>
               <span className={styles.userName}>이승민</span>
             </div>
             <p className={styles.reviewText}>여행사와의 소통도 원활하여 좋았습니다!</p>
           </div>
           <div className={styles.reviewCard}>
             <div className={styles.reviewUser}>
-              <div className={styles.userAvatar}></div>
+              <div className={styles.userAvatar} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '20px', height: '20px', color: '#9CA3AF' }}>
+                  <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+                </svg>
+              </div>
               <span className={styles.userName}>박수민</span>
             </div>
             <p className={styles.reviewText}>즉흥 여행을 좋아하는 저에게 딱 맞는 서비스입니다!</p>

@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Order {
     private double price;
-    private int orderNumber;
+    private String orderId;
 }

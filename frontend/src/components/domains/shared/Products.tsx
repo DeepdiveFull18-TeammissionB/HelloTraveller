@@ -16,12 +16,14 @@ interface ProductsProps {
     name: string;
     imagePath: string;
     description?: string;
+    price?: number;
     width?: string;
     // Type component에서 전달하는 추가 props (lint 에러 방지용)
     checked?: boolean;
     currentCount?: number;
     totalPeople?: number;
     updateItemCount?: (itemName: string, newItemCount: string | number, isReplace?: boolean) => void;
+    matchedOptions?: string[]; // 스마트 매칭된 옵션 리스트
 }
 
 const allOptions = ['현지 가이드 동행', '교통비 포함', '전용 보트 서비스', '중식 및 생수 제공', '입장료 전부 포함', '여행자 보험'];
@@ -30,23 +32,32 @@ const allOptions = ['현지 가이드 동행', '교통비 포함', '전용 보�
  * 여행 상품 컴포넌트
  * 이미지 기반의 카드 타입 UI와 상세 정보를 볼 수 있는 프리미엄 모달을 제공합니다.
  */
-const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width = '240px' }) => {
+const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price, width = '240px', matchedOptions = [] }) => {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [personCount, setPersonCount] = useState<string>("1");
-    const [selectedOptions, setSelectedOptions] = useState<string[]>(allOptions);
+    // 초기에는 아무것도 선택되지 않음 (스마트 매칭이 있을 때만 자동 체크)
+    const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
     const [startDate, setStartDate] = useState<string>("2026-01-10");
     const [endDate, setEndDate] = useState<string>("2026-01-15");
     const [imagePreloaded, setImagePreloaded] = useState(false);
+
+    // 모달이 열릴 때 스마트 매칭 실행
+    React.useEffect(() => {
+        if (isOpen && matchedOptions.length > 0) {
+            // 이미 선택된 옵션은 유지하고, 매칭된 옵션만 추가 (중복 방지 Set 이용)
+            setSelectedOptions(prev => Array.from(new Set([...prev, ...matchedOptions])));
+        }
+    }, [isOpen, matchedOptions]);
 
     const contextValue = useContext(OrderContext);
     if (!contextValue) return null; // Context가 없을 경우 안전장치
     const [, updateItemCount] = contextValue;
 
-    const finalImagePath = imagePath.startsWith('http') 
-        ? imagePath 
-        : `${BASE_URL}/${imagePath}`;
+    const finalImagePath = imagePath.startsWith('http')
+        ? imagePath
+        : `${BASE_URL}/${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}`;
 
     // 이미지 프리로딩 함수
     const preloadImage = () => {
@@ -110,6 +121,9 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                             alt={`${name} product`}
                             loading="lazy"
                             decoding="async"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
+                            }}
                         />
                         <div style={{
                             position: 'absolute',
@@ -131,10 +145,10 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                     <Card.Body style={{ padding: '16px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <div>
-                                <Text 
-                                    typography="heading6" 
-                                    style={{ 
-                                        fontWeight: 800, 
+                                <Text
+                                    typography="heading6"
+                                    style={{
+                                        fontWeight: 800,
                                         color: '#1a1a1a',
                                         display: '-webkit-box',
                                         WebkitBoxOrient: 'vertical',
@@ -144,12 +158,12 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                         height: '50px'
                                     }}
                                 >{name}</Text>
-                                <Text 
-                                    typography="body3" 
-                                    style={{ 
-                                        color: '#666', 
-                                        marginTop: '2px', 
-                                        fontSize: '11px', 
+                                <Text
+                                    typography="body3"
+                                    style={{
+                                        color: '#666',
+                                        marginTop: '2px',
+                                        fontSize: '11px',
                                         lineHeight: 1.4,
                                         display: '-webkit-box',
                                         WebkitBoxOrient: 'vertical',
@@ -162,7 +176,9 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
                                 <div>
-                                    <Text typography="heading5" color="primary" style={{ fontWeight: 800, color: '#4F46E5' }}>1,000₩</Text>
+                                    <Text typography="heading5" color="primary" style={{ fontWeight: 800, color: '#4F46E5' }}>
+                                        {((price || 1000)).toLocaleString()}원
+                                    </Text>
                                 </div>
                                 <Button size="sm" variant="fill" colorPalette="primary" style={{ borderRadius: '10px', padding: '0 12px' }}>
                                     예약
@@ -220,6 +236,9 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                 alt={`${name} tour`}
                                 loading="eager"
                                 decoding="async"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
+                                }}
                             />
                             <div style={{
                                 position: 'absolute',
@@ -389,9 +408,9 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                         typography="heading1"
                                         style={{ color: '#4F46E5', fontWeight: 900, fontSize: '40px' }}
                                     >
-                                        1,000
+                                        {(price || 1000).toLocaleString()}
                                     </Text>
-                                    <span style={{ fontSize: '20px', fontWeight: 700, color: '#4F46E5' }}>₩</span>
+                                    <span style={{ fontSize: '20px', fontWeight: 700, color: '#4F46E5' }}>원</span>
                                 </div>
                             </div>
 
@@ -404,7 +423,8 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                         countNum,
                                         "products",
                                         {
-                                            imagePath: `${BASE_URL}/${imagePath}`,
+                                            imagePath: finalImagePath,
+                                            price: price || 1000,
                                             startDate: startDate,
                                             endDate: endDate,
                                             selectedOptions: selectedOptions

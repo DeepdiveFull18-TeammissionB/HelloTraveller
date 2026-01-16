@@ -30,8 +30,8 @@ public class TravelController {
     }
 
     @PostMapping("/order")
-    public ResponseEntity<List<Order>> createOrder(@RequestBody OrderRequest request) {
-        List<Order> orderHistory = travelService.createOrder(request.getTotals().getTotal());
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderHistory);
+    public ResponseEntity<Order> createOrder(@RequestBody OrderRequest request) {
+        Order order = travelService.createOrder(request.getTotals().getTotal());
+        return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 }

@@ -109,7 +109,7 @@
 
 .section {
   align-self: stretch;
-  padding: 60px 170px 0 170px;
+  padding: 60px 170px 20px 170px;
   position: relative;
   flex-direction: column;
   justify-content: center;

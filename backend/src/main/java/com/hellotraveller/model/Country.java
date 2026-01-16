@@ -11,4 +11,5 @@ public class Country {
     private String name;
     private String imagePath;
     private String description;
+    private double price;
 }

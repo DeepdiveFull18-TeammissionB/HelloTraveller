@@ -13,6 +13,7 @@ export interface ApiItem {
 export interface ItemDetail {
     count: number;
     imagePath: string;
+    price: number;
     startDate?: string;
     endDate?: string;
     selectedOptions?: string[];

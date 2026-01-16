@@ -9,8 +9,10 @@ import OrderComplete from '../../components/common/OrderComplete';
 import PaymentSuccess from '../../components/common/PaymentSuccess'; // 다시 추가
 import Type from '../../components/domains/shared/Type';
 import { cartService } from '../../services/cartService';
+import apiClient from '../../services/apiClient';
 import { showAlert } from '../../components/common/AlertPortal';
 import { useRouter } from 'next/navigation'; // useRouter 추가
+import { getRouteInfo } from '../../services/airportService';
 
 type PaymentStep = 'cart' | 'processing' | 'completed'; // processing 단계 추가
 
@@ -33,11 +35,11 @@ export default function PaymentPage() {
 
     if (!context) return null;
 
-    const [orderData, updateItemCount, resetCart] = context;
+    const [orderData, updateItemCount, resetCart, removeItem] = context;
 
     const isCartEmpty = orderData.productItems.length === 0;
 
-    const handleOrder = () => {
+    const handleOrder = async () => {
         if (!isConfirmed) {
             showAlert({
                 title: '확인 단계',
@@ -47,34 +49,50 @@ export default function PaymentPage() {
             return;
         }
 
-        const orderId = cartService.generateOrderNumber();
-        const totalAmount = orderData.totals.total;
+        try {
+            // 1. 백엔드에 주문 요청 (이제 주문 번호는 백엔드에서 생성함)
+            const response = await apiClient.post('/order', {
+                totals: orderData.totals
+            });
 
-        const newOrder = {
-            orderId: orderId,
-            orderDate: new Date().toLocaleString(),
-            items: [
-                ...orderData.productItems.map(item => ({ ...item, type: 'tour', price: 1000 })),
-                ...orderData.optionItems.map(item => ({ ...item, type: 'option', price: 500 }))
-            ],
-            totalAmount: totalAmount,
-            totalCount: orderData.totals.totalCount
-        };
+            const serverOrder = response.data; // { orderId: "HT-...", price: ... }
+            const orderId = serverOrder.orderId;
+            const totalAmount = orderData.totals.total;
 
-        // 1. 주문 데이터 저장
-        cartService.placeOrder(newOrder);
-        setCompletedOrder({ id: orderId, amount: totalAmount });
+            const newOrder = {
+                orderId: orderId,
+                orderDate: new Date().toLocaleString(),
+                items: [
+                    ...orderData.productItems.map(item => ({ ...item, type: 'tour' })),
+                    ...orderData.optionItems.map(item => ({ ...item, type: 'option' }))
+                ],
+                totalAmount: totalAmount,
+                totalCount: orderData.totals.totalCount
+            };
 
-        // 2. 장바구니 초기화
-        if (resetCart) resetCart();
+            // 2. 주문 데이터 저장 (로컬 기록용)
+            cartService.placeOrder(newOrder);
+            setCompletedOrder({ id: orderId, amount: totalAmount });
 
-        // 3. 결제 완료 중 페이지 노출 (3초)
-        setStep('processing');
-        window.scrollTo(0, 0);
+            // 3. 장바구니 초기화
+            if (resetCart) resetCart();
 
-        setTimeout(() => {
-            setStep('completed');
-        }, 3000);
+            // 4. 결제 완료 진행
+            setStep('processing');
+            window.scrollTo(0, 0);
+
+            setTimeout(() => {
+                setStep('completed');
+            }, 3000);
+
+        } catch (error) {
+            console.error("주문 생성 실패:", error);
+            showAlert({
+                title: '주문 실패',
+                message: '서버와의 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+                type: 'error'
+            });
+        }
     };
 
     const handleCountChange = (name: string, count: number) => {
@@ -133,6 +151,7 @@ export default function PaymentPage() {
                     onItemClick={(item) => setSelectedItem(item)}
                     selectedItemName={selectedItem?.name}
                     onCountChange={handleCountChange}
+                    onRemove={(name) => removeItem(name, 'products')}
                 />
                 <OrderSummary
                     guestCount={orderData.totals.totalCount}
@@ -182,12 +201,52 @@ export default function PaymentPage() {
                     </div>
                 </div>
                 <div className={styles.detailInfoList}>
-                    {selectedItem ? (
-                        [
-                            { label: '여행 시작일', value: selectedItem.startDate, tag: '확정 일정' },
-                            { label: '여행 종료일', value: selectedItem.endDate, tag: '귀국 일정' },
-                            { label: '출발지', value: '인천국제공항 (ICN)', tag: '자동입력' },
-                            { label: '도착지', value: `${selectedItem.name} 인근 공항`, tag: '자동입력' },
+                    {selectedItem ? (() => {
+                        const route = getRouteInfo(selectedItem.name, 'Seoul'); // Default to Seoul for now
+
+                        // Local Activity Logic (No Flight)
+                        if (route.isLocalActivity) {
+                            return [
+                                {
+                                    label: '일정 시작 (Start)',
+                                    value: `${selectedItem.startDate} | 현지 일정 시작`,
+                                    tag: '현지 합류'
+                                },
+                                {
+                                    label: '일정 종료 (End)',
+                                    value: `${selectedItem.endDate} | 현지 일정 종료`,
+                                    tag: '현지 해산'
+                                },
+                            ].map((info, idx) => (
+                                <div key={idx} className={styles.detailItem}>
+                                    <div
+                                        className={styles.detailItemImage}
+                                        style={{
+                                            backgroundImage: `url(${selectedItem.imagePath})`,
+                                            backgroundSize: 'cover'
+                                        }}
+                                    />
+                                    <div className={styles.itemInfo}>
+                                        <h3 className={styles.itemLabel}>{info.label}</h3>
+                                        <p className={styles.itemValue}>{info.value}</p>
+                                        {info.tag && <div className={styles.tag}>{info.tag}</div>}
+                                    </div>
+                                </div>
+                            ));
+                        }
+
+                        // Flight Logic
+                        return [
+                            {
+                                label: '가는 날 (Outbound)',
+                                value: `${selectedItem.startDate} | ${route.departure.code} ✈️ ${route.destination.code}`,
+                                tag: '출국 항공편'
+                            },
+                            {
+                                label: '오는 날 (Inbound)',
+                                value: `${selectedItem.endDate} | ${route.destination.code} ✈️ ${route.departure.code}`,
+                                tag: '귀국 항공편'
+                            },
                         ].map((info, idx) => (
                             <div key={idx} className={styles.detailItem}>
                                 <div
@@ -203,8 +262,8 @@ export default function PaymentPage() {
                                     {info.tag && <div className={styles.tag}>{info.tag}</div>}
                                 </div>
                             </div>
-                        ))
-                    ) : (
+                        ));
+                    })() : (
                         /* 2. 상품이 선택되지 않았을 때 보여줄 안내 문구 */
                         <div style={{ padding: '40px', textAlign: 'center', width: '100%', color: '#999' }}>
                             <h2>장바구니에서 상세 정보를 확인하실 상품을 선택해 주세요.</h2>

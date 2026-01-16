@@ -10,16 +10,17 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class TravelService {
 
     private TravelData travelData;
     private final List<Order> orderHistory = new ArrayList<>();
-    private final Random random = new Random();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostConstruct
@@ -37,11 +38,14 @@ public class TravelService {
         return travelData.getOptions();
     }
 
-    public List<Order> createOrder(double price) {
-        int orderNumber = random.nextInt(1000000);
-        Order order = new Order(price, orderNumber);
+    public Order createOrder(double price) {
+        String datePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String uuidPart = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String orderId = String.format("HT-%s-%s", datePart, uuidPart);
+
+        Order order = new Order(price, orderId);
         orderHistory.add(order);
-        return orderHistory;
+        return order;
     }
 
     public List<Order> getOrderHistory() {

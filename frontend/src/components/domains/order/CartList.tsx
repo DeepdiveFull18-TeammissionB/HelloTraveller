@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import { Card, Text } from '@vapor-ui/core';
+import { showAlert } from '../../common/AlertPortal';
 
 interface CartItem {
     name: string;
@@ -17,6 +18,7 @@ interface CartListProps {
     onItemClick?: (item: any) => void;
     selectedItemName?: string;
     onCountChange?: (name: string, count: number) => void;
+    onRemove?: (name: string) => void;
 }
 
 /**
@@ -27,7 +29,8 @@ const CartList: React.FC<CartListProps> = ({
     style,
     onItemClick,
     selectedItemName,
-    onCountChange
+    onCountChange,
+    onRemove
 }) => {
     return (
         <Card.Root style={{ ...cartContainerStyle, ...style }}>
@@ -62,6 +65,9 @@ const CartList: React.FC<CartListProps> = ({
                                     src={item.imagePath}
                                     alt={item.name}
                                     style={imageStyle}
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
+                                    }}
                                 />
                             )}
                             <div style={itemInfoAreaStyle}>
@@ -97,6 +103,34 @@ const CartList: React.FC<CartListProps> = ({
                                 style={quantityInputStyle}
                             />
                             <Text typography="body1" style={{ marginLeft: '4px', fontWeight: 600 }}>명</Text>
+
+                            {/* 삭제 버튼 추가 */}
+                            {onRemove && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        showAlert({
+                                            title: '상품 삭제',
+                                            message: `\n정말로 '${item.name}' 상품을\n장바구니에서 삭제하시겠습니까?`,
+                                            type: 'warning',
+                                            onConfirm: () => {
+                                                if (onRemove) onRemove(item.name);
+                                                setTimeout(() => {
+                                                    showAlert({
+                                                        title: '삭제 완료',
+                                                        message: '\n상품이 장바구니에서 삭제되었습니다.',
+                                                        type: 'success'
+                                                    });
+                                                }, 200);
+                                            }
+                                        });
+                                    }}
+                                    style={deleteButtonStyle}
+                                    title="상품 삭제"
+                                >
+                                    ✕
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}
@@ -167,6 +201,21 @@ const quantityInputStyle: React.CSSProperties = {
     textAlign: 'center',
     fontSize: '14px',
     fontWeight: 600
+};
+
+const deleteButtonStyle: React.CSSProperties = {
+    marginLeft: '12px',
+    border: 'none',
+    background: 'none',
+    fontSize: '18px',
+    cursor: 'pointer',
+    color: '#999',
+    padding: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    lineHeight: 1,
+    transition: 'color 0.2s'
 };
 
 export default CartList;

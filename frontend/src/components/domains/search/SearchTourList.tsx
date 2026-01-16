@@ -7,6 +7,7 @@ interface Item {
     name: string;
     imagePath: string;
     description: string;
+    price: number;
 }
 
 interface SearchTourListProps {
@@ -32,6 +33,7 @@ const categoryKeywords: Record<string, string[]> = {
 };
 
 const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isCompact = false }) => {
+    const router = useRouter();
     const [items, setItems] = useState<Item[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -93,6 +95,7 @@ const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isC
                         name={prod.name}
                         imagePath={prod.imagePath}
                         description={prod.description}
+                        price={prod.price}
                         width="280px"
                     />
                 ))}

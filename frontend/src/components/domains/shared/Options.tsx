@@ -9,6 +9,7 @@ import {
 interface OptionsProps {
     name: string;
     description?: string;
+    price?: number;
     checked?: boolean;
     currentCount: number;
     totalPeople: number;
@@ -19,7 +20,7 @@ interface OptionsProps {
  * 여행 부가 옵션 컴포넌트
  * 선택 시 체크박스와 함께 프리미엄한 카드 UI를 제공합니다.
  */
-const Options: React.FC<OptionsProps> = ({ name, description, checked = false, currentCount, totalPeople, updateItemCount }) => {
+const Options: React.FC<OptionsProps> = ({ name, description, price, checked = false, currentCount, totalPeople, updateItemCount }) => {
     // 옵션별 아이콘 매핑 (이름 기준)
     const getIcon = (optionName: string) => {
         const lowerName = optionName.toLowerCase();
@@ -132,10 +133,10 @@ const Options: React.FC<OptionsProps> = ({ name, description, checked = false, c
                 }}>
                     <div>
                         <Text typography="body1" style={{ fontWeight: 800, color: '#4F46E5', display: 'block' }}>
-                            {(500 * (checked ? currentCount : 1)).toLocaleString()}₩
+                            {((price || 500) * (checked ? currentCount : 1)).toLocaleString()}₩
                         </Text>
                         <Text typography="body3" style={{ fontSize: '10px', color: '#999' }}>
-                            {currentCount > 1 && checked ? `(500₩ × ${currentCount}명)` : '인당 500₩'}
+                            {currentCount > 1 && checked ? `${(price || 500).toLocaleString()}₩ × ${currentCount}명` : `인당 ${(price || 500).toLocaleString()}₩`}
                         </Text>
                     </div>
 

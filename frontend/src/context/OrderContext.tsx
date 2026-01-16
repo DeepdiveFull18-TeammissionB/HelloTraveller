@@ -14,6 +14,7 @@ type UpdateItemCount = (
     orderType: OrderType,
     metadata?: {
         imagePath: string;
+        price?: number;
         startDate?: string;
         endDate?: string;
         selectedOptions?: string[]
@@ -22,8 +23,8 @@ type UpdateItemCount = (
 ) => void;
 
 
-// Context value type: [orderData, updateItemCount, resetOrderCounts]
-export type OrderContextValue = [OrderData, UpdateItemCount, () => void];
+// Context value type: [orderData, updateItemCount, resetOrderCounts, removeItem]
+export type OrderContextValue = [OrderData, UpdateItemCount, () => void, (itemName: string, orderType: OrderType) => void];
 
 const OrderContext = createContext<OrderContextValue | undefined>(undefined);
 export default OrderContext;
@@ -57,12 +58,13 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
     }, []);
 
     function calculateSubtotal(orderType: OrderType, currentOrderCounts: OrderCounts): number {
-        let countSum = 0;
+        let total = 0;
         const itemsMap = currentOrderCounts[orderType];
         for (const item of itemsMap.values()) {
-            countSum += item.count;
+            const price = item.price || pricePerItem[orderType];
+            total += item.count * price;
         }
-        return countSum * pricePerItem[orderType];
+        return total;
     }
 
     // 수량 합계(totalCount)를 구하는 함수
@@ -107,6 +109,7 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
             orderType: OrderType,
             metadata?: {
                 imagePath: string;
+                price?: number;
                 startDate?: string;
                 endDate?: string;
                 selectedOptions?: string[]
@@ -126,6 +129,7 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
                     nextProducts.set(itemName, {
                         count: newCount,
                         imagePath: metadata?.imagePath || existingItem?.imagePath || "",
+                        price: metadata?.price || existingItem?.price || 1000,
                         startDate: metadata?.startDate || existingItem?.startDate,
                         endDate: metadata?.endDate || existingItem?.endDate,
                         selectedOptions: metadata?.selectedOptions || existingItem?.selectedOptions || [],
@@ -145,6 +149,7 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
                     nextOptions.set(itemName, {
                         count: isReplace ? addCount : (existingItem?.count || 0) + addCount,
                         imagePath: metadata?.imagePath || existingItem?.imagePath || "",
+                        price: metadata?.price || existingItem?.price || 500,
                         startDate: metadata?.startDate || existingItem?.startDate,
                         endDate: metadata?.endDate || existingItem?.endDate,
                         selectedOptions: metadata?.selectedOptions || existingItem?.selectedOptions || [],
@@ -168,7 +173,11 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
             optionItems: mapToArray(orderCounts.options),
         };
 
-        return [orderData, updateItemCount, resetCart];
+        const removeItem = (itemName: string, orderType: OrderType) => {
+            updateItemCount(itemName, 0, orderType, undefined, true);
+        };
+
+        return [orderData, updateItemCount, resetCart, removeItem];
     }, [orderCounts, totals]);
 
     return <OrderContext.Provider value={value}>

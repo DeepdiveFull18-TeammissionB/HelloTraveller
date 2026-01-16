@@ -120,12 +120,5 @@ export const cartService = {
     } catch (error) {
       return [];
     }
-  },
-
-  generateOrderNumber: (): string => {
-    const date = new Date();
-    const dateString = date.toISOString().slice(0, 10).replace(/-/g, "");
-    const randomString = Math.random().toString(36).substring(2, 7).toUpperCase();
-    return `HT-${dateString}-${randomString}`;
   }
 };
