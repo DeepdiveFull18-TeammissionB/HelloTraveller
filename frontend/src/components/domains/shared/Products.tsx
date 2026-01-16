@@ -38,10 +38,24 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
     const [selectedOptions, setSelectedOptions] = useState<string[]>(allOptions);
     const [startDate, setStartDate] = useState<string>("2026-01-10");
     const [endDate, setEndDate] = useState<string>("2026-01-15");
+    const [imagePreloaded, setImagePreloaded] = useState(false);
 
     const contextValue = useContext(OrderContext);
     if (!contextValue) return null; // Context가 없을 경우 안전장치
     const [, updateItemCount] = contextValue;
+
+    const finalImagePath = imagePath.startsWith('http') 
+        ? imagePath 
+        : `${BASE_URL}/${imagePath}`;
+
+    // 이미지 프리로딩 함수
+    const preloadImage = () => {
+        if (!imagePreloaded) {
+            const img = new Image();
+            img.src = finalImagePath;
+            setImagePreloaded(true);
+        }
+    };
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         const currentValue = event.target.value;
@@ -62,7 +76,10 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
             {/* 상품 카드 */}
             <div
                 onClick={() => setIsOpen(true)}
-                onMouseEnter={() => setIsHovered(true)}
+                onMouseEnter={() => {
+                    setIsHovered(true);
+                    preloadImage(); // 호버 시 모달 이미지 미리 로드
+                }}
                 onMouseLeave={() => setIsHovered(false)}
                 style={{ cursor: 'pointer', transition: 'transform 0.3s ease' }}
             >
@@ -89,8 +106,10 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                 transition: 'transform 0.5s ease',
                                 transform: isHovered ? 'scale(1.1)' : 'scale(1)'
                             }}
-                            src={`${BASE_URL}/${imagePath}`}
+                            src={finalImagePath}
                             alt={`${name} product`}
+                            loading="lazy"
+                            decoding="async"
                         />
                         <div style={{
                             position: 'absolute',
@@ -112,7 +131,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                     <Card.Body style={{ padding: '16px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <div>
-                                <Text typography="heading6" style={{ fontWeight: 800, color: '#1a1a1a', display: 'block' }}>{name} 투어</Text>
+                                <Text typography="heading6" style={{ fontWeight: 800, color: '#1a1a1a', display: 'block' }}>{name}</Text>
                                 <Text typography="body3" style={{ color: '#666', marginTop: '2px', display: 'block', fontSize: '11px', lineHeight: 1.4 }}>{description || '멋진 추억을 만들어줄 투어.'}</Text>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
@@ -171,8 +190,10 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, width
                                     objectFit: 'cover',
                                     display: 'block'
                                 }}
-                                src={`${BASE_URL}/${imagePath}`}
+                                src={finalImagePath}
                                 alt={`${name} tour`}
+                                loading="eager"
+                                decoding="async"
                             />
                             <div style={{
                                 position: 'absolute',
