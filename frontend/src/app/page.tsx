@@ -78,20 +78,17 @@ export default function Home() {
             {
               title: '여행자 보험',
               sub: '안전한 여행',
-              icon: '🛡️',
-              price: '10,000원'
+              icon: '🛡️'
             },
             {
               title: '식사권 포함',
               sub: '맛있는 저녁',
-              icon: '🍽️',
-              price: '30,000원'
+              icon: '🍽️'
             },
             {
               title: '좌석 업그레이드',
               sub: '더 편안한 여행',
-              icon: '✈️',
-              price: '50,000원'
+              icon: '✈️'
             }
           ].map((option, idx) => (
             <div key={idx} className={styles.optionItem}>
@@ -102,7 +99,6 @@ export default function Home() {
                 <h3 className={styles.optionItemTitle}>{option.title}</h3>
                 <p className={styles.optionItemSub}>{option.sub}</p>
               </div>
-              <p className={styles.optionItemPrice}>{option.price}</p>
             </div>
           ))}
         </div>

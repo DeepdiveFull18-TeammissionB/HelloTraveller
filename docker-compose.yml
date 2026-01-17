@@ -21,3 +21,21 @@ services:
       AWS_SECRET_ACCESS_KEY: test
     depends_on:
       - dynamodb-local
+
+  backend:
+    image: hellodockerj/hellotraveller-backend:v1
+    container_name: backend-server
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    restart: always
+
+  frontend:
+    image: hellodockerj/hellotraveller-frontend:v1
+    container_name: frontend-server
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env.local
+    restart: always

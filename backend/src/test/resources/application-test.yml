@@ -4,8 +4,8 @@ spring:
 
 amadeus:
   client:
-    id: ${AMADEUS_KEY}
-    secret: ${AMADEUS_SECRET}
+    id: ${AMADEUS_KEY:dummy_key}
+    secret: ${AMADEUS_SECRET:dummy_secret}
 
 cors:
   allowed-origins: "*"
