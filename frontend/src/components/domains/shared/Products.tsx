@@ -33,13 +33,23 @@ interface ProductsProps {
  */
 const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price, width = '240px', matchedOptions = [] }) => {
     const router = useRouter();
+    // 오늘로부터 일주일 뒤 날짜 계산 함수
+    const getFutureDate = (days: number) => {
+        const date = new Date();
+        date.setDate(date.getDate() + days);
+        return date.toISOString().split('T')[0];
+    };
+
+    const minDate = getFutureDate(7); // 최소 예약 가능일 (오늘 + 7일)
+    const defaultEnd = getFutureDate(12); // 기본 종료일
+
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [personCount, setPersonCount] = useState<string>("1");
     // 초기에는 아무것도 선택되지 않음 (스마트 매칭이 있을 때만 자동 체크)
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-    const [startDate, setStartDate] = useState<string>("2026-01-10");
-    const [endDate, setEndDate] = useState<string>("2026-01-15");
+    const [startDate, setStartDate] = useState<string>(minDate);
+    const [endDate, setEndDate] = useState<string>(defaultEnd);
     const [imagePreloaded, setImagePreloaded] = useState(false);
 
     // 모달이 열릴 때 스마트 매칭 실행
@@ -299,7 +309,15 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price
                                         <input
                                             type="date"
                                             value={startDate}
-                                            onChange={(e) => setStartDate(e.target.value)}
+                                            min={minDate}
+                                            onChange={(e) => {
+                                                const newDate = e.target.value;
+                                                setStartDate(newDate);
+                                                // 시작일이 종료일보다 늦어지면 종료일을 시작일로 맞춤
+                                                if (new Date(endDate) < new Date(newDate)) {
+                                                    setEndDate(newDate);
+                                                }
+                                            }}
                                             style={{
                                                 // Vapor UI의 TextInput과 최대한 비슷하게 보이도록 스타일 조정
                                                 borderRadius: '12px',
@@ -316,6 +334,7 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price
                                         <input
                                             type="date"
                                             value={endDate}
+                                            min={startDate}
                                             onChange={(e) => setEndDate(e.target.value)}
                                             style={{
                                                 // Vapor UI의 TextInput과 최대한 비슷하게 보이도록 스타일 조정

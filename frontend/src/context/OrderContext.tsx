@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, useMemo, useState, useEffect, ReactNode, useCallback } from "react";
 import { cartService } from "../services/cartService";
-import { OrderData, OrderCounts, Totals, OrderType, ItemDetail, OrderItem } from "../types/order";
+import { OrderData, OrderCounts, Totals, OrderType, ItemDetail, OrderItem, CustomerInfo } from "../types/order";
 
 // Local types removed as they are now imported from ../types/order
 
@@ -23,8 +23,14 @@ type UpdateItemCount = (
 ) => void;
 
 
-// Context value type: [orderData, updateItemCount, resetOrderCounts, removeItem]
-export type OrderContextValue = [OrderData, UpdateItemCount, () => void, (itemName: string, orderType: OrderType) => void];
+// Context value type: [orderData, updateItemCount, resetOrderCounts, removeItem, updateCustomerInfo]
+export type OrderContextValue = [
+    OrderData,
+    UpdateItemCount,
+    () => void,
+    (itemName: string, orderType: OrderType) => void,
+    (info: CustomerInfo) => void
+];
 
 const OrderContext = createContext<OrderContextValue | undefined>(undefined);
 export default OrderContext;
@@ -33,11 +39,18 @@ interface OrderContextProviderProps {
     children: ReactNode;
 }
 
+const pricePerItem: Record<OrderType, number> = {
+    products: 1000,
+    options: 500,
+};
+
 export function OrderContextProvider(props: OrderContextProviderProps) {
     const [orderCounts, setOrderCounts] = useState<OrderCounts>({
         products: new Map(),
         options: new Map()
     });
+
+    const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({ name: '', email: '', phone: '' });
 
     // const [totals, setTotals] = useState<Totals>({
     //     products: 0,
@@ -47,15 +60,16 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
     // });
 
 
-    const pricePerItem: Record<OrderType, number> = {
-        products: 1000,
-        options: 500,
-    };
-
     useEffect(() => {
         const savedData = cartService.getCartItems();
+        const savedCustomer = cartService.getCustomerInfo();
         const timer = setTimeout(() => {
             setOrderCounts(savedData);
+            setCustomerInfo({
+                name: savedCustomer.name || '',
+                email: savedCustomer.email || '',
+                phone: savedCustomer.phone || ''
+            });
         }, 0);
         return () => clearTimeout(timer);
     }, []);
@@ -78,6 +92,11 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
             countSum += item.count;
         }
         return countSum;
+    }, []);
+
+    const updateCustomerInfo = useCallback((info: CustomerInfo) => {
+        setCustomerInfo(info);
+        cartService.saveCustomerInfo(info);
     }, []);
 
     const totals = useMemo<Totals>(() => {
@@ -177,14 +196,15 @@ export function OrderContextProvider(props: OrderContextProviderProps) {
             totals,
             productItems: mapToArray(orderCounts.products),
             optionItems: mapToArray(orderCounts.options),
+            customerInfo
         };
 
         const removeItem = (itemName: string, orderType: OrderType) => {
             updateItemCount(itemName, 0, orderType, undefined, true);
         };
 
-        return [orderData, updateItemCount, resetCart, removeItem];
-    }, [orderCounts, totals]);
+        return [orderData, updateItemCount, resetCart, removeItem, updateCustomerInfo];
+    }, [orderCounts, totals, customerInfo, updateCustomerInfo]);
 
     return <OrderContext.Provider value={value}>
         {props.children}

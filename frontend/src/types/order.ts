@@ -38,11 +38,19 @@ export interface Totals {
     totalCount: number; // 상품 총 수량
 }
 
+// 고객 정보
+export interface CustomerInfo {
+    name: string;
+    email: string;
+    phone: string;
+}
+
 // 주문 컨텍스트 데이터
 export interface OrderData extends OrderCounts {
     totals: Totals;
     productItems: OrderItem[];
     optionItems: OrderItem[];
+    customerInfo: CustomerInfo;
 }
 
 export type OrderType = "products" | "options";

@@ -34,3 +34,6 @@ build/
 
 ### Debugging : server log ###
 server_restore_*.log
+
+# Security
+.env

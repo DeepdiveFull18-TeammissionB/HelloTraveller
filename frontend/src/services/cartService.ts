@@ -1,11 +1,13 @@
 "use client";
 
-import { ItemDetail, OrderCounts } from "../types/order";
+import { ItemDetail, OrderCounts, CustomerInfo, OrderItem } from "../types/order";
+import apiClient from "./apiClient";
 
 // Local interfaces removed as they are now imported from ../types/order
 
 const CART_KEY = "hello_traveler_cart";
 const ORDERS_KEY = "hello_traveler_orders";
+const CUSTOMER_KEY = "hello_traveler_customer";
 
 // 저장된 주문 데이터 인터페이스
 export interface SavedOrder {
@@ -14,11 +16,7 @@ export interface SavedOrder {
   date: string;
   totalAmount: number;
   status: 'confirmed' | 'canceled';
-  customerInfo?: {
-    name: string;
-    email: string;
-    phone: string;
-  };
+  customerInfo?: CustomerInfo;
 }
 
 export const cartService = {
@@ -76,7 +74,6 @@ export const cartService = {
       const existingOrdersData = localStorage.getItem(ORDERS_KEY);
       const orders: SavedOrder[] = existingOrdersData ? JSON.parse(existingOrdersData) : [];
 
-      // 주문 상태 기본값 추가
       const orderWithStatus: SavedOrder = {
         ...orderDetail,
         status: 'confirmed'
@@ -84,6 +81,17 @@ export const cartService = {
 
       orders.unshift(orderWithStatus);
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+
+      // NEW: 백엔드 DynamoDB에 동기화
+      apiClient.post('/api/orders', {
+        orderID: orderWithStatus.orderId,
+        totalAmount: orderWithStatus.totalAmount,
+        date: orderWithStatus.date,
+        status: orderWithStatus.status,
+        items: orderWithStatus.items,
+        customerInfo: orderWithStatus.customerInfo
+      }).catch(err => console.error("DB Sync failed:", err));
+
     } catch (error) {
       console.error("주문 저장 실패:", error);
     }
@@ -92,17 +100,28 @@ export const cartService = {
   /**
    * 주문 상태 업데이트 (예: 예약 취소)
    */
-  updateOrderStatus: (orderId: string, newStatus: 'confirmed' | 'canceled'): void => {
+  updateOrderStatus: async (orderId: string, newStatus: 'confirmed' | 'canceled'): Promise<void> => {
     try {
       const data = localStorage.getItem(ORDERS_KEY);
       if (!data) return;
 
-      let orders: SavedOrder[] = JSON.parse(data);
-      orders = orders.map((order) =>
-        order.orderId === orderId ? { ...order, status: newStatus } : order
-      );
+      const orders: SavedOrder[] = JSON.parse(data);
+      const targetOrder = orders.find(o => o.orderId === orderId);
 
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      if (targetOrder) {
+        targetOrder.status = newStatus;
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+
+        // 백엔드 동기화 (Upsert)
+        await apiClient.post('/api/orders', {
+          orderID: targetOrder.orderId,
+          totalAmount: targetOrder.totalAmount,
+          date: targetOrder.date,
+          status: targetOrder.status,
+          items: targetOrder.items,
+          customerInfo: targetOrder.customerInfo
+        });
+      }
     } catch (error) {
       console.error("주문 상태 업데이트 실패:", error);
     }
@@ -111,22 +130,58 @@ export const cartService = {
   /**
    * 주문 내역 삭제 (영구 삭제)
    */
-  deleteOrder: (orderId: string): void => {
+  deleteOrder: async (orderId: string): Promise<void> => {
     try {
       const data = localStorage.getItem(ORDERS_KEY);
       if (!data) return;
 
-      let orders: SavedOrder[] = JSON.parse(data);
-      orders = orders.filter((order) => order.orderId !== orderId);
+      const orders: SavedOrder[] = JSON.parse(data);
+      const filteredOrders = orders.filter((order) => order.orderId !== orderId);
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(filteredOrders));
 
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      // 백엔드 삭제 요청
+      await apiClient.delete(`/api/orders/${orderId}`);
     } catch (error) {
       console.error("주문 삭제 실패:", error);
     }
   },
 
   /**
-   * 주문 목록 불러오기
+   * 주문 목록 서버에서 불러오기 (DB -> LocalStorage 동기화)
+   */
+  fetchOrdersFromBackend: async (): Promise<SavedOrder[]> => {
+    try {
+      const response = await apiClient.get('/api/orders');
+      const backendOrders = (response.data as Array<{
+        orderID: string;
+        totalAmount: number;
+        date: string;
+        status: string;
+        items: OrderItem[];
+        customerInfo: CustomerInfo;
+      }>)
+        .filter((o) => o.status !== 'deleted')
+        .map((o) => ({
+          orderId: o.orderID,
+          totalAmount: o.totalAmount,
+          date: o.date,
+          status: o.status as 'confirmed' | 'canceled',
+          items: o.items || [],
+          customerInfo: o.customerInfo
+        }));
+
+      if (backendOrders.length > 0) {
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(backendOrders));
+      }
+      return backendOrders;
+    } catch (error) {
+      console.error("백엔드 주문 불러오기 실패:", error);
+      return [];
+    }
+  },
+
+  /**
+   * 주문 목록 불러오기 (동기)
    */
   getOrders: (): SavedOrder[] => {
     try {
@@ -135,5 +190,20 @@ export const cartService = {
     } catch {
       return [];
     }
+  },
+
+  /**
+   * 예약자 정보 저장
+   */
+  saveCustomerInfo: (info: { name: string; email: string }): void => {
+    localStorage.setItem(CUSTOMER_KEY, JSON.stringify(info));
+  },
+
+  /**
+   * 예약자 정보 로드
+   */
+  getCustomerInfo: (): CustomerInfo => {
+    const data = localStorage.getItem(CUSTOMER_KEY);
+    return data ? JSON.parse(data) : { name: '', email: '', phone: '' };
   }
 };

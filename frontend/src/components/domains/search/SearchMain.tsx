@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../../../app/search/search.module.css';
 import SearchTourList from './SearchTourList';
 import { showAlert } from '../../common/AlertPortal';
+import OrderContext from '../../../context/OrderContext';
 
 interface SearchMainProps {
     onDetailsClick: () => void;
@@ -11,7 +12,23 @@ interface SearchMainProps {
 
 const SearchMain: React.FC<SearchMainProps> = ({ onDetailsClick, onSearchClick }) => {
     const router = useRouter();
-    const [formData, setFormData] = useState({ name: '', email: '' });
+    const context = React.useContext(OrderContext);
+
+    // context가 없으면 기본값 사용 (렌더링 방어)
+    const [orderData, , , , updateCustomerInfo] = context || [{
+        products: new Map(),
+        options: new Map(),
+        totals: { products: 0, options: 0, total: 0, totalCount: 0 },
+        productItems: [],
+        optionItems: [],
+        customerInfo: { name: '', email: '', phone: '' }
+    }, () => { }, () => { }, () => { }, () => { }];
+    const formData = orderData?.customerInfo || { name: '', email: '' };
+
+    const setFormData = (newInfo: { name: string, email: string }) => {
+        if (updateCustomerInfo) updateCustomerInfo({ ...newInfo, phone: formData.phone || '' });
+    };
+
     const cardStyleGrid = styles.cardGrid;
 
     const validateForm = () => {

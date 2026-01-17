@@ -10,9 +10,15 @@ export default function OrdersPage() {
     const [orders, setOrders] = useState<SavedOrder[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const loadOrders = () => {
-        const loadedOrders = cartService.getOrders();
-        setOrders(loadedOrders);
+    const loadOrders = async () => {
+        // DB에서 최신 데이터 가져와서 로컬스토리지 업데이트
+        const backendOrders = await cartService.fetchOrdersFromBackend();
+        if (backendOrders.length > 0) {
+            setOrders(backendOrders);
+        } else {
+            // 실패하거나 데이터가 없으면 로컬이라도 보여줌
+            setOrders(cartService.getOrders());
+        }
         setLoading(false);
     };
 
@@ -30,8 +36,8 @@ export default function OrdersPage() {
             type: 'warning',
             confirmLabel: '예약 취소',
             cancelLabel: '예약 유지',
-            onConfirm: () => {
-                cartService.updateOrderStatus(orderId, 'canceled');
+            onConfirm: async () => {
+                await cartService.updateOrderStatus(orderId, 'canceled');
                 loadOrders(); // 상태 새로고침
                 showAlert({
                     title: '취소 완료',
@@ -49,8 +55,8 @@ export default function OrdersPage() {
             type: 'warning',
             confirmLabel: '내역 삭제',
             cancelLabel: '삭제 취소',
-            onConfirm: () => {
-                cartService.deleteOrder(orderId);
+            onConfirm: async () => {
+                await cartService.deleteOrder(orderId);
                 loadOrders();
                 showAlert({
                     title: '삭제 완료',

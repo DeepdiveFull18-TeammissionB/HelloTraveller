@@ -24,7 +24,7 @@ export default function PaymentPage() {
     const [step, setStep] = useState<PaymentStep>('cart');
     const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
-    const [completedOrder, setCompletedOrder] = useState<{ id: string, amount: number } | null>(null);
+    const [completedOrder, setCompletedOrder] = useState<{ id: string, amount: number, dDay: number } | null>(null);
 
     const context = useContext(OrderContext);
 
@@ -52,14 +52,46 @@ export default function PaymentPage() {
             return;
         }
 
+        // 고객 정보가 없으면 진행 불가 (OrderSummary에서 걸러지겠지만 이중 체크)
+        if (!orderData.customerInfo?.name || !orderData.customerInfo?.email) {
+            showAlert({
+                title: '정보 누락',
+                message: '예약자 정보(이름, 이메일)가 없습니다.\n주문하기 버튼을 다시 눌러 정보를 입력해 주세요.',
+                type: 'warning'
+            });
+            return;
+        }
+
         try {
-            // 1. 백엔드에 주문 요청 (이제 주문 번호는 백엔드에서 생성함)
+            // 1. D-Day 계산 (장바구니 비우기 전)
+            const calculateDDay = () => {
+                const dates = orderData.productItems
+                    .map(item => item.startDate)
+                    .filter(Boolean) as string[];
+
+                if (dates.length === 0) return 0;
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const startDates = dates.map(d => new Date(d));
+                const minStartDate = new Date(Math.min(...startDates.map(d => d.getTime())));
+                minStartDate.setHours(0, 0, 0, 0);
+
+                const diffTime = minStartDate.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays > 0 ? diffDays : 0;
+            };
+
+            const dDayValue = calculateDDay();
+
+            // 2. 백엔드에 주문 요청 (HT-번호 생성용)
             const response = await apiClient.post('/order', {
                 totals: orderData.totals
             });
 
-            const serverOrder = response.data; // { orderId: "HT-...", price: ... }
-            const orderId = serverOrder.orderId;
+            const serverOrder = response.data;
+            const orderId = serverOrder.orderId || serverOrder.orderID; // 백엔드 필드명 대응
             const totalAmount = orderData.totals.total;
 
             const newOrder = {
@@ -70,17 +102,18 @@ export default function PaymentPage() {
                     ...orderData.optionItems.map(item => ({ ...item, type: 'option' }))
                 ],
                 totalAmount: totalAmount,
-                totalCount: orderData.totals.totalCount
+                totalCount: orderData.totals.totalCount,
+                customerInfo: orderData.customerInfo // 예약자 정보 포함
             };
 
-            // 2. 주문 데이터 저장 (로컬 기록용)
+            // 3. 주문 데이터 저장 (로컬 기록 및 DB 상세 업데이트)
             cartService.placeOrder(newOrder);
-            setCompletedOrder({ id: orderId, amount: totalAmount });
+            setCompletedOrder({ id: orderId, amount: totalAmount, dDay: dDayValue });
 
-            // 3. 장바구니 초기화
+            // 4. 장바구니 초기화
             if (resetCart) resetCart();
 
-            // 4. 결제 완료 진행
+            // 5. 결제 완료 진행
             setStep('processing');
             window.scrollTo(0, 0);
 
@@ -117,7 +150,7 @@ export default function PaymentPage() {
         return (
             <div className={styles.container}>
                 <OrderComplete
-                    dDay={7}
+                    dDay={completedOrder.dDay}
                     tickets={[
                         { orderNumber: completedOrder.id, amount: completedOrder.amount }
                     ]}

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,8 +19,10 @@ import java.util.UUID;
 public class TravelService {
 
     private TravelData travelData;
-    private final List<Order> orderHistory = new ArrayList<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private OrderService orderService;
 
     @PostConstruct
     public void init() throws IOException {
@@ -43,12 +44,17 @@ public class TravelService {
         String uuidPart = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         String orderId = String.format("HT-%s-%s", datePart, uuidPart);
 
-        Order order = new Order(price, orderId);
-        orderHistory.add(order);
+        Order order = new Order();
+        order.setOrderID(orderId);
+        order.setTotalAmount(price);
+        order.setStatus("confirmed");
+        order.setDate(LocalDate.now().toString());
+
+        orderService.createOrder(order);
         return order;
     }
 
     public List<Order> getOrderHistory() {
-        return orderHistory;
+        return orderService.getAllOrders();
     }
 }
