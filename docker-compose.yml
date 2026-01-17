@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    working_dir: /home/dynamodblocal
+    volumes:
+      - "./docker/dynamodblocaltest:/home/dynamodblocal/data"
+
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMODB_ENDPOINT: http://dynamodb-local:8000
+      AWS_REGION: ap-northeast-2
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    depends_on:
+      - dynamodb-local
+
+  backend:
+    image: hellodockerj/hellotraveller-backend:v1
+    container_name: backend-server
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    restart: always
+
+  frontend:
+    image: hellodockerj/hellotraveller-frontend:v1
+    container_name: frontend-server
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env.local
+    restart: always

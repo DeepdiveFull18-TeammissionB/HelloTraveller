@@ -3,8 +3,9 @@ import { Geist, Geist_Mono, Roboto, Tilt_Warp } from "next/font/google";
 import "./globals.css";
 import { OrderContextProvider } from "@/context/OrderContext";
 import { ThemeProvider } from "@vapor-ui/core";
-import Footer from "@/components/Footer";
-import GlobalHeader from "@/components/GlobalHeader";
+import Footer from "@/components/layout/Footer";
+import GlobalHeader from "@/components/layout/GlobalHeader";
+import { AlertPortal } from "@/components/common/AlertPortal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,6 +51,7 @@ export default function RootLayout({
               </main>
               <Footer />
             </div>
+            <AlertPortal />
           </ThemeProvider>
         </OrderContextProvider>
       </body>

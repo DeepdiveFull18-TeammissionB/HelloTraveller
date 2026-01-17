@@ -1,7 +1,17 @@
+import React from 'react'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import Products from '../Products'
+import Products from '../domains/shared/Products'
 import { OrderContextProvider } from '@/context/OrderContext'
+
+import { BASE_URL } from '../../services/apiClient'
+
+jest.mock('swiper/modules', () => ({
+    Navigation: () => null,
+    Pagination: () => null,
+}));
+
+jest.mock('swiper/css', () => ({}));
 
 describe('Products Component', () => {
     const mockUpdateItemCount = jest.fn()
@@ -19,7 +29,7 @@ describe('Products Component', () => {
             </OrderContextProvider>
         )
 
-        expect(screen.getByText('San Francisco 투어')).toBeInTheDocument()
+        expect(screen.getByText('San Francisco')).toBeInTheDocument()
     })
 
     it('renders product image', () => {
@@ -31,7 +41,7 @@ describe('Products Component', () => {
 
         const image = screen.getByAltText('San Francisco product')
         expect(image).toBeInTheDocument()
-        expect(image).toHaveAttribute('src', 'http://localhost:4000/images/san-francisco.jpeg')
+        expect(image).toHaveAttribute('src', `${BASE_URL}/images/san-francisco.jpeg`)
     })
 
     it('displays price', () => {
@@ -41,16 +51,15 @@ describe('Products Component', () => {
             </OrderContextProvider>
         )
 
-        expect(screen.getByText('1,000원')).toBeInTheDocument()
+        expect(screen.getByText(/1,000.*원/)).toBeInTheDocument()
     })
-
-    it('has detail button', () => {
+    it('has reserve button', () => {
         render(
             <OrderContextProvider>
                 <Products {...defaultProps} />
             </OrderContextProvider>
         )
 
-        expect(screen.getByText('상세보기')).toBeInTheDocument()
+        expect(screen.getByText('예약')).toBeInTheDocument()
     })
-})
+});

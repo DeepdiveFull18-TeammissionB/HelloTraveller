@@ -1,8 +1,165 @@
 "use client";
-import React from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { OrderItem } from '../../types/order';
+import OrderContext from '../../context/OrderContext';
 import Link from 'next/link';
 import styles from './payment.module.css';
+import CartList from '../../components/domains/order/CartList';
+import OrderSummary from '../../components/domains/order/OrderSummary';
+import OrderComplete from '../../components/common/OrderComplete';
+import PaymentSuccess from '../../components/common/PaymentSuccess'; // 다시 추가
+import Type from '../../components/domains/shared/Type';
+import { cartService } from '../../services/cartService';
+import apiClient from '../../services/apiClient';
+import { showAlert } from '../../components/common/AlertPortal';
+import { useRouter } from 'next/navigation'; // useRouter 추가
+import { getRouteInfo } from '../../services/airportService';
+
+type PaymentStep = 'cart' | 'processing' | 'completed'; // processing 단계 추가
+
+
+
 export default function PaymentPage() {
+    const router = useRouter();
+    const [step, setStep] = useState<PaymentStep>('cart');
+    const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
+    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [completedOrder, setCompletedOrder] = useState<{ id: string, amount: number, dDay: number } | null>(null);
+
+    const context = useContext(OrderContext);
+
+    useEffect(() => {
+        if (context && context[0].productItems.length > 0 && !selectedItem) {
+            const firstItem = context[0].productItems[0];
+            const timer = setTimeout(() => {
+                setSelectedItem(firstItem);
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+    }, [context, selectedItem]);
+
+    if (!context) return null;
+
+    const [orderData, updateItemCount, resetCart, removeItem] = context;
+
+    const handleOrder = async () => {
+        if (!isConfirmed) {
+            showAlert({
+                title: '확인 단계',
+                message: '\n먼저 하단의 "주문하기" 버튼을 눌러.\n주문 내용을 최종 확인해 주세요.',
+                type: 'info'
+            });
+            return;
+        }
+
+        // 고객 정보가 없으면 진행 불가 (OrderSummary에서 걸러지겠지만 이중 체크)
+        if (!orderData.customerInfo?.name || !orderData.customerInfo?.email) {
+            showAlert({
+                title: '정보 누락',
+                message: '예약자 정보(이름, 이메일)가 없습니다.\n주문하기 버튼을 다시 눌러 정보를 입력해 주세요.',
+                type: 'warning'
+            });
+            return;
+        }
+
+        try {
+            // 1. D-Day 계산 (장바구니 비우기 전)
+            const calculateDDay = () => {
+                const dates = orderData.productItems
+                    .map(item => item.startDate)
+                    .filter(Boolean) as string[];
+
+                if (dates.length === 0) return 0;
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const startDates = dates.map(d => new Date(d));
+                const minStartDate = new Date(Math.min(...startDates.map(d => d.getTime())));
+                minStartDate.setHours(0, 0, 0, 0);
+
+                const diffTime = minStartDate.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays > 0 ? diffDays : 0;
+            };
+
+            const dDayValue = calculateDDay();
+
+            // 2. 백엔드에 주문 요청 (HT-번호 생성용)
+            const response = await apiClient.post('/order', {
+                totals: orderData.totals
+            });
+
+            const serverOrder = response.data;
+            const orderId = serverOrder.orderId || serverOrder.orderID; // 백엔드 필드명 대응
+            const totalAmount = orderData.totals.total;
+
+            const newOrder = {
+                orderId: orderId,
+                date: new Date().toLocaleString(),
+                items: [
+                    ...orderData.productItems.map(item => ({ ...item, type: 'tour' })),
+                    ...orderData.optionItems.map(item => ({ ...item, type: 'option' }))
+                ],
+                totalAmount: totalAmount,
+                totalCount: orderData.totals.totalCount,
+                customerInfo: orderData.customerInfo // 예약자 정보 포함
+            };
+
+            // 3. 주문 데이터 저장 (로컬 기록 및 DB 상세 업데이트)
+            cartService.placeOrder(newOrder);
+            setCompletedOrder({ id: orderId, amount: totalAmount, dDay: dDayValue });
+
+            // 4. 장바구니 초기화
+            if (resetCart) resetCart();
+
+            // 5. 결제 완료 진행
+            setStep('processing');
+            window.scrollTo(0, 0);
+
+            setTimeout(() => {
+                setStep('completed');
+            }, 3000);
+
+        } catch (error) {
+            console.error("주문 생성 실패:", error);
+            showAlert({
+                title: '주문 실패',
+                message: '서버와의 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+                type: 'error'
+            });
+        }
+    };
+
+    const handleCountChange = (name: string, count: number) => {
+        const existingImage = orderData.productItems.find(item => item.name === name)?.imagePath || "";
+        updateItemCount(name, count, "products", { imagePath: existingImage }, true);
+    };
+
+    // 1단계: 결제 처리 중 (PaymentSuccess 노출)
+    if (step === 'processing') {
+        return (
+            <div className={styles.container}>
+                <PaymentSuccess />
+            </div>
+        );
+    }
+
+    // 2단계: 최종 완료 (OrderComplete 티켓 노출)
+    if (step === 'completed' && completedOrder) {
+        return (
+            <div className={styles.container}>
+                <OrderComplete
+                    dDay={completedOrder.dDay}
+                    tickets={[
+                        { orderNumber: completedOrder.id, amount: completedOrder.amount }
+                    ]}
+                    onViewOrders={() => router.push('/orders')}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className={styles.container}>
             {/* Hero / Detailed Info Header */}
@@ -14,11 +171,32 @@ export default function PaymentPage() {
                         <Link href="/search" className={styles.btnOutline} style={{ textDecoration: 'none' }}>
                             상품 목록으로 돌아가기
                         </Link>
-                        <div className={styles.btnSolid}>결제 진행</div>
+                        <div
+                            className={styles.btnSolid}
+                            onClick={handleOrder}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            결제 진행
+                        </div>
                     </div>
                 </div>
             </section>
-
+            <section style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%', padding: '20px' }}>
+                <CartList
+                    items={orderData.productItems}
+                    onItemClick={(item) => setSelectedItem(item)}
+                    selectedItemName={selectedItem?.name}
+                    onCountChange={handleCountChange}
+                    onRemove={(name) => removeItem(name, 'products')}
+                />
+                <OrderSummary
+                    guestCount={orderData.totals.totalCount}
+                    productAmount={orderData.totals.products}
+                    optionAmount={orderData.totals.options}
+                    totalAmount={orderData.totals.total}
+                    onOrderConfirm={() => setIsConfirmed(true)} // 주문 확인 시 상태 업데이트
+                />
+            </section>
             {/* Extra Products Section */}
             <section className={styles.extraSection}>
                 <div className={styles.extraHeader}>
@@ -26,12 +204,8 @@ export default function PaymentPage() {
                         <h2 className={styles.sectionTitle}>추가 상품</h2>
                         <p className={styles.sectionSubtitle}>여행의 즐거움을 더해줄 추가 상품을 선택하세요.</p>
                     </div>
-                    <div className={styles.buttonGroup}>
-                        <div className={styles.btnOutline}>취소</div>
-                        <div className={styles.btnSolid}>선택 완료</div>
-                    </div>
                 </div>
-                <div className={styles.extraGrid}>
+                {/* <div className={styles.extraGrid}>
                     {[
                         { title: '좌석 업그레이드', price: '₩30,000', badge: '인기', sub: '비행기좌석 업그레이드' },
                         { title: '조식', price: '₩15,000', badge: '추천', sub: '호텔 조식 포함' },
@@ -49,7 +223,9 @@ export default function PaymentPage() {
                             </div>
                         </div>
                     ))}
-                </div>
+                </div> */}
+                <Type orderType="options" hideHeader={true} />
+
             </section>
 
             {/* Product Detail Info Section */}
@@ -59,27 +235,76 @@ export default function PaymentPage() {
                         <h2 className={styles.sectionTitle}>상품 정보</h2>
                         <p className={styles.sectionSubtitle}>상품의 세부정보를 확인하세요.</p>
                     </div>
-                    <div className={styles.buttonGroup}>
-                        <div className={styles.btnOutline}>돌아가기</div>
-                        <div className={styles.btnSolid}>자세히 보기</div>
-                    </div>
                 </div>
                 <div className={styles.detailInfoList}>
-                    {[
-                        { label: '여행 시작일', value: '2023년 12월 01일', tag: '정확한 일정' },
-                        { label: '여행 종료일', value: '2023년 12월 08일', tag: '일주일' },
-                        { label: '출발지', value: '인천국제공항', tag: null },
-                        { label: '도착지', value: '파리, 프랑스', tag: null },
-                    ].map((info, idx) => (
-                        <div key={idx} className={styles.detailItem}>
-                            <div className={styles.detailItemImage} />
-                            <div className={styles.itemInfo}>
-                                <h3 className={styles.itemLabel}>{info.label}</h3>
-                                <p className={styles.itemValue}>{info.value}</p>
-                                {info.tag && <div className={styles.tag}>{info.tag}</div>}
+                    {selectedItem ? (() => {
+                        const route = getRouteInfo(selectedItem.name, 'Seoul'); // Default to Seoul for now
+
+                        // Local Activity Logic (No Flight)
+                        if (route.isLocalActivity) {
+                            return [
+                                {
+                                    label: '일정 시작 (Start)',
+                                    value: `${selectedItem.startDate} | 현지 일정 시작`,
+                                    tag: '현지 합류'
+                                },
+                                {
+                                    label: '일정 종료 (End)',
+                                    value: `${selectedItem.endDate} | 현지 일정 종료`,
+                                    tag: '현지 해산'
+                                },
+                            ].map((info, idx) => (
+                                <div key={idx} className={styles.detailItem}>
+                                    <div
+                                        className={styles.detailItemImage}
+                                        style={{
+                                            backgroundImage: `url(${selectedItem.imagePath})`,
+                                            backgroundSize: 'cover'
+                                        }}
+                                    />
+                                    <div className={styles.itemInfo}>
+                                        <h3 className={styles.itemLabel}>{info.label}</h3>
+                                        <p className={styles.itemValue}>{info.value}</p>
+                                        {info.tag && <div className={styles.tag}>{info.tag}</div>}
+                                    </div>
+                                </div>
+                            ));
+                        }
+
+                        // Flight Logic
+                        return [
+                            {
+                                label: '가는 날 (Outbound)',
+                                value: `${selectedItem.startDate} | ${route.departure.code} ✈️ ${route.destination.code}`,
+                                tag: '출국 항공편'
+                            },
+                            {
+                                label: '오는 날 (Inbound)',
+                                value: `${selectedItem.endDate} | ${route.destination.code} ✈️ ${route.departure.code}`,
+                                tag: '귀국 항공편'
+                            },
+                        ].map((info, idx) => (
+                            <div key={idx} className={styles.detailItem}>
+                                <div
+                                    className={styles.detailItemImage}
+                                    style={{
+                                        backgroundImage: `url(${selectedItem.imagePath})`,
+                                        backgroundSize: 'cover'
+                                    }}
+                                />
+                                <div className={styles.itemInfo}>
+                                    <h3 className={styles.itemLabel}>{info.label}</h3>
+                                    <p className={styles.itemValue}>{info.value}</p>
+                                    {info.tag && <div className={styles.tag}>{info.tag}</div>}
+                                </div>
                             </div>
+                        ));
+                    })() : (
+                        /* 2. 상품이 선택되지 않았을 때 보여줄 안내 문구 */
+                        <div style={{ padding: '40px', textAlign: 'center', width: '100%', color: '#999' }}>
+                            <h2>장바구니에서 상세 정보를 확인하실 상품을 선택해 주세요.</h2>
                         </div>
-                    ))}
+                    )}
                 </div>
             </section>
         </div>

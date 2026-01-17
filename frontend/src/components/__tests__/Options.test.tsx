@@ -1,6 +1,20 @@
+import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import Options from '../Options'
+import Options from '../domains/shared/Options'
+
+// Mock Swiper components
+jest.mock('swiper/react', () => ({
+    Swiper: ({ children }: { children: React.ReactNode }) => <div data-testid="swiper-mock">{children}</div>,
+    SwiperSlide: ({ children }: { children: React.ReactNode }) => <div data-testid="swiper-slide-mock">{children}</div>,
+}));
+
+jest.mock('swiper', () => ({
+    Navigation: () => null,
+    Pagination: () => null,
+}));
+
+jest.mock('swiper/css', () => ({}));
 
 describe('Options Component', () => {
     const mockUpdateItemCount = jest.fn()
@@ -8,6 +22,8 @@ describe('Options Component', () => {
     const defaultProps = {
         name: 'Insurance',
         updateItemCount: mockUpdateItemCount,
+        currentCount: 0,
+        totalPeople: 1,
     }
 
     beforeEach(() => {
@@ -21,7 +37,10 @@ describe('Options Component', () => {
 
     it('displays price', () => {
         render(<Options {...defaultProps} />)
-        expect(screen.getByText('(+500원)')).toBeInTheDocument()
+        // '인당 500₩'과 '500 ₩' 중 하나만 확실히 매칭되도록 getAll 처리하거나 특정 요소를 지칭
+        const priceElements = screen.getAllByText(/500.*₩/)
+        expect(priceElements.length).toBeGreaterThanOrEqual(1)
+        expect(priceElements[0]).toBeInTheDocument()
     })
 
     it('has checkbox', () => {

@@ -46,3 +46,6 @@ next-env.d.ts
 # IDEs
 .vscode/
 .idea/
+
+# Local DynamoDB Data
+docker/dynamodblocaltest/
