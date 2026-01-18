@@ -66,7 +66,7 @@ public class AmadeusController {
         }).start();
     }
 
-    @GetMapping("/tours")
+    @GetMapping("/external/tours")
     public List<Map<String, Object>> getTours(@RequestParam Double lat, @RequestParam Double lon)
             throws ResponseException {
 

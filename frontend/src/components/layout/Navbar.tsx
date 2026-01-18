@@ -5,13 +5,14 @@ import styles from './Navbar.module.css';
 
 export interface NavbarProps {
     title: string;
-    links: { label: string; href?: string }[];
+    links: { label: string; href?: string; onClick?: () => void }[];
     showLogoCircle?: boolean;
+    userGreeting?: string; // 인사말 추가
 }
 
 import { useRouter, usePathname } from 'next/navigation';
 
-const Navbar = ({ title, links, showLogoCircle = true }: NavbarProps) => {
+const Navbar = ({ title, links, showLogoCircle = true, userGreeting }: NavbarProps) => {
     const router = useRouter();
     const pathname = usePathname();
 
@@ -64,6 +65,11 @@ const Navbar = ({ title, links, showLogoCircle = true }: NavbarProps) => {
                 </h1>
             </div>
             <div className={styles.navLinks}>
+                {userGreeting && (
+                    <span style={{ marginRight: '24px', fontWeight: 600, color: '#444', fontSize: '0.95rem' }}>
+                        {userGreeting}
+                    </span>
+                )}
                 {links.map((link, idx) => (
                     link.href ? (
                         <Link
@@ -75,7 +81,14 @@ const Navbar = ({ title, links, showLogoCircle = true }: NavbarProps) => {
                             {link.label}
                         </Link>
                     ) : (
-                        <span key={idx} className={styles.navLink}>{link.label}</span>
+                        <span
+                            key={idx}
+                            className={styles.navLink}
+                            onClick={link.onClick} // onClick 연결
+                            style={link.onClick ? { cursor: 'pointer' } : undefined} // 클릭 가능하면 커서 변경
+                        >
+                            {link.label}
+                        </span>
                     )
                 ))}
                 <div className={styles.searchBar}>

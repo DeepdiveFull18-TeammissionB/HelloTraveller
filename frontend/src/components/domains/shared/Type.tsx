@@ -10,6 +10,7 @@ import Products from './Products';
 import Options from './Options';
 import { OrderType } from '../../../types/order';
 import apiClient from '../../../services/apiClient';
+import ProductService from '../../../services/productService';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
@@ -57,20 +58,21 @@ const Type: React.FC<TypeProps> = ({ orderType, hideHeader = false }) => {
         setLoading(true);
         try {
             let data: TourItem[] = [];
-            let params: Record<string, string> = {};
-            let endpoint = '';
 
             if (orderType === 'products') {
                 const randomCity = CITIES[Math.floor(Math.random() * CITIES.length)];
                 setCurrentCity(randomCity);
-                params = { lat: String(randomCity.lat), lon: String(randomCity.lon) };
-                endpoint = '/api/tours';
-            } else {
-                endpoint = '/options';
-            }
 
-            const response = await apiClient.get(endpoint, { params });
-            data = response.data;
+                // [Refactored] Use ProductService
+                data = await ProductService.fetchTourProducts({
+                    lat: randomCity.lat,
+                    lon: randomCity.lon
+                });
+            } else {
+                // 옵션은 기존대로
+                const response = await apiClient.get('/options');
+                data = response.data;
+            }
 
             let mappedItems: TourItem[] = [];
             if (orderType === 'products') {

@@ -1,27 +1,39 @@
 {
   "countries": [
     {
+      "name": "Switzerland",
+      "imagePath": "/images/switzerland.jpeg",
+      "description": "Amazing Mountain and Hiking nature",
+      "price": 3500000
+    },
+    {
+      "name": "Bali",
+      "imagePath": "/images/bali.jpeg",
+      "description": "Beautiful Beach and Ocean sea",
+      "price": 1500000
+    },
+    {
       "name": "America",
       "imagePath": "/images/america.jpeg",
-      "description": "Good America",
+      "description": "Good America City Tour",
       "price": 2500000
     },
     {
       "name": "England",
       "imagePath": "/images/england.jpeg",
-      "description": "Good England",
+      "description": "Good England Modern City",
       "price": 2200000
     },
     {
       "name": "Germany",
       "imagePath": "/images/germany.jpeg",
-      "description": "Good Germany",
+      "description": "Good Germany Forest Park",
       "price": 1800000
     },
     {
       "name": "Portland",
       "imagePath": "/images/portland.jpeg",
-      "description": "Good Portland",
+      "description": "Good Portland Adventure",
       "price": 2300000
     }
   ],

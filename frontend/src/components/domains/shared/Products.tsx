@@ -1,5 +1,6 @@
 "use client";
-import React, { ChangeEvent, useState, useContext } from 'react';
+import React, { ChangeEvent, useState, useContext, useEffect } from 'react';
+import NextImage from 'next/image';
 import { createPortal } from 'react-dom';
 import OrderContext from '../../../context/OrderContext';
 import {
@@ -33,6 +34,11 @@ interface ProductsProps {
  */
 const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price, width = '240px', matchedOptions = [] }) => {
     const router = useRouter();
+
+    const finalImagePath = imagePath.startsWith('http')
+        ? imagePath
+        : `${BASE_URL}/${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}`;
+
     // 오늘로부터 일주일 뒤 날짜 계산 함수
     const getFutureDate = (days: number) => {
         const date = new Date();
@@ -52,6 +58,14 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price
     const [endDate, setEndDate] = useState<string>(defaultEnd);
     const [imagePreloaded, setImagePreloaded] = useState(false);
 
+    const [imgSrc, setImgSrc] = useState(finalImagePath);
+    const [modalImgSrc, setModalImgSrc] = useState(finalImagePath);
+
+    useEffect(() => {
+        setImgSrc(finalImagePath);
+        setModalImgSrc(finalImagePath);
+    }, [finalImagePath]);
+
     // 모달이 열릴 때 스마트 매칭 실행
     React.useEffect(() => {
         if (isOpen && matchedOptions.length > 0) {
@@ -63,10 +77,6 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price
     const contextValue = useContext(OrderContext);
     if (!contextValue) return null; // Context가 없을 경우 안전장치
     const [, updateItemCount] = contextValue;
-
-    const finalImagePath = imagePath.startsWith('http')
-        ? imagePath
-        : `${BASE_URL}/${imagePath.startsWith('/') ? imagePath.substring(1) : imagePath}`;
 
     // 이미지 프리로딩 함수
     const preloadImage = () => {
@@ -117,22 +127,18 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price
                         transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                     }}
                 >
-                    <div style={{ position: 'relative', overflow: 'hidden' }}>
-                        <img
+                    <div style={{ position: 'relative', overflow: 'hidden', height: '160px' }}>
+                        <NextImage
+                            fill
                             style={{
-                                width: '100%',
-                                height: '160px',
                                 objectFit: 'cover',
                                 transition: 'transform 0.5s ease',
                                 transform: isHovered ? 'scale(1.1)' : 'scale(1)'
                             }}
-                            src={finalImagePath}
+                            src={imgSrc}
                             alt={`${name} product`}
-                            loading="lazy"
-                            decoding="async"
-                            onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
-                            }}
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            onError={() => setImgSrc('https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80')}
                         />
                         <div style={{
                             position: 'absolute',
@@ -234,20 +240,16 @@ const Products: React.FC<ProductsProps> = ({ name, imagePath, description, price
                     >
                         {/* 이미지 & 상단 버튼 */}
                         <div style={{ position: 'relative', height: '450px', flexShrink: 0 }}>
-                            <img
+                            <NextImage
+                                fill
                                 style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover',
-                                    display: 'block'
+                                    objectFit: 'cover'
                                 }}
-                                src={finalImagePath}
+                                src={modalImgSrc}
                                 alt={`${name} tour`}
-                                loading="eager"
-                                decoding="async"
-                                onError={(e) => {
-                                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
-                                }}
+                                priority
+                                sizes="(max-width: 1200px) 100vw, 800px"
+                                onError={() => setModalImgSrc('https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80')}
                             />
                             <div style={{
                                 position: 'absolute',

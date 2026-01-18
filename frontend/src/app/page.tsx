@@ -4,6 +4,8 @@ import styles from './page.module.css';
 import Type from '@/components/domains/shared/Type';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import NextImage from 'next/image';
+
 export default function Home() {
   const router = useRouter();
 
@@ -18,11 +20,14 @@ export default function Home() {
             <span className={styles.heroButtonText}>여행 상품 탐색하기</span>
           </Link>
         </div>
-        <div className={styles.heroImageArea}>
-          <img
+        <div className={styles.heroImageArea} style={{ position: 'relative' }}>
+          <NextImage
             src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
             alt="Travel Hero"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            fill
+            style={{ objectFit: 'cover' }}
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
           />
         </div>
       </section>
