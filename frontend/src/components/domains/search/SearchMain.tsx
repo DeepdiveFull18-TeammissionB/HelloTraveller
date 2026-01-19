@@ -91,7 +91,7 @@ const SearchMain: React.FC<SearchMainProps> = ({ onDetailsClick, onSearchClick }
                     <h2 className={styles.heroTitle}>모두를 위한 여행 상품</h2>
                     <p className={styles.heroSubtitle}>당신의 완벽한 여행을 찾으세요. 다양한 여행 상품들을 확인하고 예약하세요!</p>
                     <div className={styles.heroButtons}>
-                        <div className={styles.btnOutline}>회원가입</div>
+                        <div className={styles.btnOutline} onClick={() => router.push('/signup')}>회원가입</div>
                         <div className={styles.btnSolid} onClick={onSearchClick}>지금 탐색하기</div>
                     </div>
                 </div>

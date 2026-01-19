@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Products from '../shared/Products';
-import apiClient from '../../../services/apiClient';
+import ProductService from '../../../services/productService';
 import { useRouter } from 'next/navigation';
 
 interface Item {
@@ -41,13 +41,17 @@ const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isC
         const load = async () => {
             try {
                 const coords = categoryCoordinates[category] || categoryCoordinates['추천 여행'];
-                const response = await apiClient.get('/api/tours', {
-                    params: { lat: coords.lat, lon: coords.lon }
+
+                // [Refactored] Use ProductService
+                let data = await ProductService.fetchTourProducts({
+                    lat: coords.lat,
+                    lon: coords.lon
                 });
 
                 if (!isMounted) return;
 
-                let data: Item[] = response.data;
+                // 필터링 전 원본 데이터 보존
+                const originalData = [...data];
 
                 if (category !== '추천 여행') {
                     const keywords = categoryKeywords[category];
@@ -60,7 +64,8 @@ const SearchTourList: React.FC<SearchTourListProps> = ({ category, maxItems, isC
                 }
 
                 if (data.length < 2) {
-                    data = response.data;
+                    // 필터링 결과가 너무 적으면 원본 데이터(추천 여행 등)를 대신 보여줌
+                    data = originalData;
                 }
 
                 const shuffled = [...data].sort(() => Math.random() - 0.5);

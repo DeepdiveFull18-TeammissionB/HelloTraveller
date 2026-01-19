@@ -1,5 +1,6 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import NextImage from 'next/image';
 import { Card, Text } from '@vapor-ui/core';
 import { showAlert } from '../../common/AlertPortal';
 
@@ -62,13 +63,10 @@ const CartList: React.FC<CartListProps> = ({
                     >
                         <div style={{ display: 'flex', gap: '16px', flex: 2, alignItems: 'center' }}>
                             {item.imagePath && (
-                                <img
+                                <CartItemImage
                                     src={item.imagePath}
                                     alt={item.name}
                                     style={imageStyle}
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
-                                    }}
                                 />
                             )}
                             <div style={itemInfoAreaStyle}>
@@ -217,6 +215,25 @@ const deleteButtonStyle: React.CSSProperties = {
     justifyContent: 'center',
     lineHeight: 1,
     transition: 'color 0.2s'
+};
+
+const CartItemImage = ({ src, alt, style }: { src: string, alt: string, style?: React.CSSProperties }) => {
+    const [imgSrc, setImgSrc] = useState(src);
+
+    useEffect(() => {
+        setImgSrc(src);
+    }, [src]);
+
+    return (
+        <NextImage
+            width={70}
+            height={70}
+            src={imgSrc}
+            alt={alt}
+            style={style}
+            onError={() => setImgSrc('https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80')}
+        />
+    );
 };
 
 export default CartList;

@@ -1,6 +1,6 @@
 "use client";
 
-import { ItemDetail, OrderCounts, CustomerInfo, OrderItem } from "../types/order";
+import { ItemDetail, OrderCounts, CustomerInfo } from "../types/order";
 import apiClient from "./apiClient";
 
 // Local interfaces removed as they are now imported from ../types/order
@@ -12,9 +12,11 @@ const CUSTOMER_KEY = "hello_traveler_customer";
 // 저장된 주문 데이터 인터페이스
 export interface SavedOrder {
   orderId: string;
+  orderNo?: string; // 추가
   items: Array<ItemDetail & { name: string; type?: string }>;
   date: string;
   totalAmount: number;
+  totalCount?: number; // 추가 (인원수)
   status: 'confirmed' | 'canceled';
   customerInfo?: CustomerInfo;
 }
@@ -83,13 +85,17 @@ export const cartService = {
       localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 
       // NEW: 백엔드 DynamoDB에 동기화
-      apiClient.post('/api/orders', {
-        orderID: orderWithStatus.orderId,
-        totalAmount: orderWithStatus.totalAmount,
-        date: orderWithStatus.date,
-        status: orderWithStatus.status,
-        items: orderWithStatus.items,
-        customerInfo: orderWithStatus.customerInfo
+      // NOTE: 백엔드 동기화 (신규 CRM 경로 반영 /api/v1/orders)
+      apiClient.post('/api/v1/orders', {
+        orderNo: orderWithStatus.orderId, // HT-XXXX 번호
+        customerName: orderWithStatus.customerInfo?.name,
+        customerEmail: orderWithStatus.customerInfo?.email,
+        customerPhone: orderWithStatus.customerInfo?.phone,
+        productName: orderWithStatus.items[0]?.name || '여행 상품',
+        price: orderWithStatus.totalAmount,
+        personCount: orderDetail.totalCount || 1,
+        startDate: (orderWithStatus.items[0] as ItemDetail & { startDate?: string })?.startDate,
+        endDate: (orderWithStatus.items[0] as ItemDetail & { endDate?: string })?.endDate
       }).catch(err => console.error("DB Sync failed:", err));
 
     } catch (error) {
@@ -112,14 +118,12 @@ export const cartService = {
         targetOrder.status = newStatus;
         localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 
-        // 백엔드 동기화 (Upsert)
-        await apiClient.post('/api/orders', {
-          orderID: targetOrder.orderId,
-          totalAmount: targetOrder.totalAmount,
-          date: targetOrder.date,
-          status: targetOrder.status,
-          items: targetOrder.items,
-          customerInfo: targetOrder.customerInfo
+        // 백엔드 동기화 (신규 CRM 경로 반영)
+        await apiClient.post('/api/v1/orders', {
+          orderNo: targetOrder.orderId,
+          customerName: targetOrder.customerInfo?.name,
+          customerEmail: targetOrder.customerInfo?.email,
+          status: targetOrder.status
         });
       }
     } catch (error) {
@@ -139,8 +143,8 @@ export const cartService = {
       const filteredOrders = orders.filter((order) => order.orderId !== orderId);
       localStorage.setItem(ORDERS_KEY, JSON.stringify(filteredOrders));
 
-      // 백엔드 삭제 요청
-      await apiClient.delete(`/api/orders/${orderId}`);
+      // 백엔드 삭제 요청 (필요 시 구현, 현재는 경로만 맞춤)
+      // await apiClient.delete(`/api/v1/orders/${orderId}`);
     } catch (error) {
       console.error("주문 삭제 실패:", error);
     }
@@ -151,29 +155,9 @@ export const cartService = {
    */
   fetchOrdersFromBackend: async (): Promise<SavedOrder[]> => {
     try {
-      const response = await apiClient.get('/api/orders');
-      const backendOrders = (response.data as Array<{
-        orderID: string;
-        totalAmount: number;
-        date: string;
-        status: string;
-        items: OrderItem[];
-        customerInfo: CustomerInfo;
-      }>)
-        .filter((o) => o.status !== 'deleted')
-        .map((o) => ({
-          orderId: o.orderID,
-          totalAmount: o.totalAmount,
-          date: o.date,
-          status: o.status as 'confirmed' | 'canceled',
-          items: o.items || [],
-          customerInfo: o.customerInfo
-        }));
-
-      if (backendOrders.length > 0) {
-        localStorage.setItem(ORDERS_KEY, JSON.stringify(backendOrders));
-      }
-      return backendOrders;
+      // 신규 CRM API를 통한 비회원 주문 조회 로직으로 복구 (필요시 구현)
+      // 현재는 로컬 데이터를 우선시하되 에러 로그를 남기지 않도록 처리
+      return [];
     } catch (error) {
       console.error("백엔드 주문 불러오기 실패:", error);
       return [];

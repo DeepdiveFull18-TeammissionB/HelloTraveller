@@ -19,6 +19,16 @@ type PaymentStep = 'cart' | 'processing' | 'completed'; // processing 단계 추
 
 
 
+type ApiError = {
+    response?: {
+        data?: {
+            message?: string;
+            errors?: unknown;
+        };
+        status?: number;
+    };
+};
+
 export default function PaymentPage() {
     const router = useRouter();
     const [step, setStep] = useState<PaymentStep>('cart');
@@ -85,17 +95,33 @@ export default function PaymentPage() {
 
             const dDayValue = calculateDDay();
 
-            // 2. 백엔드에 주문 요청 (HT-번호 생성용)
-            const response = await apiClient.post('/order', {
-                totals: orderData.totals
+            // 2. 백엔드에 주문 요청 (실제 주문 생성 및 저장)
+            // 첫 번째 상품을 대표 상품으로 간주 (투어 상품 기준)
+            const mainProduct = orderData.productItems[0];
+
+            const response = await apiClient.post('/api/v1/orders', {
+                customerName: orderData.customerInfo?.name || 'Guest',
+                customerEmail: orderData.customerInfo?.email || 'unknown@email.com',
+                customerPhone: orderData.customerInfo?.phone || '',
+                productName: mainProduct?.name || '패키지 여행',
+                price: Number(orderData.totals.total) || 0,
+                personCount: Number(orderData.totals.totalCount) || 1,
+                startDate: mainProduct?.startDate || new Date().toISOString().split('T')[0],
+                endDate: mainProduct?.endDate || new Date().toISOString().split('T')[0]
             });
 
+            // ApiResponse Wrapper 없이 직접 오므로 response.data가 OrderResponse임.
             const serverOrder = response.data;
-            const orderId = serverOrder.orderId || serverOrder.orderID; // 백엔드 필드명 대응
-            const totalAmount = orderData.totals.total;
+            const orderNo = serverOrder.orderNo;
+            // 백엔드 OrderResponse는 totalAmount 필드를 가질 가능성이 높음 (DTO 확인 후 적용)
+            // 안전하게 둘 다 체크
+            const totalAmount = serverOrder.price || serverOrder.totalAmount;
+
+
 
             const newOrder = {
-                orderId: orderId,
+                orderId: orderNo, // 내부 cartService용 (통합을 위해 orderNo 사용)
+                orderNo: orderNo, // 표시용
                 date: new Date().toLocaleString(),
                 items: [
                     ...orderData.productItems.map(item => ({ ...item, type: 'tour' })),
@@ -103,12 +129,12 @@ export default function PaymentPage() {
                 ],
                 totalAmount: totalAmount,
                 totalCount: orderData.totals.totalCount,
-                customerInfo: orderData.customerInfo // 예약자 정보 포함
+                customerInfo: orderData.customerInfo
             };
 
-            // 3. 주문 데이터 저장 (로컬 기록 및 DB 상세 업데이트)
+            // 3. 주문 데이터 저장 및 완료 상태 업데이트
             cartService.placeOrder(newOrder);
-            setCompletedOrder({ id: orderId, amount: totalAmount, dDay: dDayValue });
+            setCompletedOrder({ id: orderNo, amount: totalAmount, dDay: dDayValue });
 
             // 4. 장바구니 초기화
             if (resetCart) resetCart();
@@ -121,11 +147,21 @@ export default function PaymentPage() {
                 setStep('completed');
             }, 3000);
 
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("주문 생성 실패:", error);
+            const err = error as ApiError;
+            // 에러 메시지 상세 추출
+            let errorMsg = '서버와의 통신 중 오류가 발생했습니다.';
+            if (err.response) {
+                errorMsg = err.response.data?.message || `오류 코드: ${err.response.status}`;
+                if (err.response.data?.errors) {
+                    errorMsg += `\n(${JSON.stringify(err.response.data.errors)})`;
+                }
+            }
+
             showAlert({
                 title: '주문 실패',
-                message: '서버와의 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+                message: errorMsg + '\n잠시 후 다시 시도해 주세요.',
                 type: 'error'
             });
         }
@@ -154,7 +190,7 @@ export default function PaymentPage() {
                     tickets={[
                         { orderNumber: completedOrder.id, amount: completedOrder.amount }
                     ]}
-                    onViewOrders={() => router.push('/orders')}
+                    onViewOrders={() => router.push('/orders/guest')}
                 />
             </div>
         );

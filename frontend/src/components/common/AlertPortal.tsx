@@ -61,11 +61,11 @@ export const AlertPortal: React.FC = () => {
         <div style={overlayStyle} onClick={() => setIsOpen(false)}>
             <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
                 <div style={iconAreaStyle}>{getIcon()}</div>
-                <div style={contentAreaStyle}>
-                    <Text typography="heading4" style={{ fontWeight: 800, marginBottom: '16px', color: '#1a1a1a' }}>
+                <div style={{ ...contentAreaStyle, display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+                    <Text typography="heading4" style={{ fontWeight: 800, color: '#1a1a1a', display: 'block' }}>
                         {options.title}
                     </Text>
-                    <Text typography="body1" style={{ color: '#666', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                    <Text typography="body1" style={{ color: '#666', lineHeight: 1.6, whiteSpace: 'pre-wrap', display: 'block' }}>
                         {options.message}
                     </Text>
                 </div>
