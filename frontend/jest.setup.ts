@@ -1,6 +1,10 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 
+
+// Mock environment variables for Jest
+process.env.NEXT_PUBLIC_API_URL = 'http://localhost:4000';
+
 // 1. Axios 모의 객체 설정
 jest.mock('axios', () => ({
     create: jest.fn(() => ({
@@ -14,6 +18,16 @@ jest.mock('axios', () => ({
     get: jest.fn(),
     post: jest.fn(),
 }));
+
+jest.mock('next/image', () => ({
+    __esModule: true,
+    default: (props: any) => {
+        // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+        return React.createElement('img', props);
+    },
+}));
+
+
 
 // 2. Next.js Navigation 모의 객체 설정
 jest.mock('next/navigation', () => ({
