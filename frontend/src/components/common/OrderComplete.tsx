@@ -49,7 +49,7 @@ const OrderComplete: React.FC<OrderCompleteProps> = ({
                             주문번호: {ticket.orderNumber}
                         </Text>
                         <Text typography="body1" style={{ fontWeight: 700 }}>
-                            결제 금액: {ticket.amount.toLocaleString()}₩
+                            결제 금액: {(ticket.amount || 0).toLocaleString()}₩
                         </Text>
                     </Card.Root>
                 ))}

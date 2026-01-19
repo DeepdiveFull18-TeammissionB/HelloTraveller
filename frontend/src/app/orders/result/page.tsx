@@ -6,14 +6,16 @@ import { showAlert } from '@/components/common/AlertPortal';
 
 interface OrderData {
     orderNo: string;
-    customerName: string;
-    customerEmail: string;
     productName: string;
-    price: number;
-    personCount: number;
+    totalAmount: number;
+    status: string;
+    guestName: string;
+    guestEmail: string;
+    guestPhone: string;
+    createdAt: string;
     startDate: string;
     endDate: string;
-    orderDate: string;
+    personCount: number;
 }
 
 export default function OrderResultPage() {
@@ -75,12 +77,12 @@ export default function OrderResultPage() {
 
                 {/* 상세 정보 */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                    <InfoItem label="예약자 이름" value={order.customerName} />
-                    <InfoItem label="이메일" value={order.customerEmail} />
+                    <InfoItem label="예약자 이름" value={order.guestName} />
+                    <InfoItem label="이메일" value={order.guestEmail} />
                     <InfoItem label="여행 시작일" value={order.startDate} />
                     <InfoItem label="여행 종료일" value={order.endDate} />
                     <InfoItem label="인원 수" value={`${order.personCount}명`} />
-                    <InfoItem label="주문 일자" value={order.orderDate} />
+                    <InfoItem label="주문 일자" value={new Date(order.createdAt).toLocaleString('ko-KR')} />
                 </div>
 
                 {/* 결제 금액 */}
@@ -95,7 +97,7 @@ export default function OrderResultPage() {
                 }}>
                     <Text typography="heading4" style={{ fontWeight: 700, color: '#333' }}>총 결제 금액</Text>
                     <Text typography="heading2" style={{ fontWeight: 900, color: '#4F46E5' }}>
-                        {order.price.toLocaleString()}원
+                        {order.totalAmount.toLocaleString()}원
                     </Text>
                 </div>
 

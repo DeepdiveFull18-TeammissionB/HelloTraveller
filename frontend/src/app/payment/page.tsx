@@ -52,13 +52,23 @@ export default function PaymentPage() {
 
     const [orderData, updateItemCount, resetCart, removeItem] = context;
 
+    const [isLoading, setIsLoading] = useState(false);
+
+    const isSubmitting = React.useRef(false);
+
     const handleOrder = async () => {
+        if (isSubmitting.current) return; // Immediate block using Ref
+        isSubmitting.current = true;
+        setIsLoading(true);
+
         if (!isConfirmed) {
             showAlert({
                 title: '확인 단계',
                 message: '\n먼저 하단의 "주문하기" 버튼을 눌러.\n주문 내용을 최종 확인해 주세요.',
                 type: 'info'
             });
+            isSubmitting.current = false;
+            setIsLoading(false);
             return;
         }
 
@@ -69,6 +79,8 @@ export default function PaymentPage() {
                 message: '예약자 정보(이름, 이메일)가 없습니다.\n주문하기 버튼을 다시 눌러 정보를 입력해 주세요.',
                 type: 'warning'
             });
+            isSubmitting.current = false;
+            setIsLoading(false);
             return;
         }
 
@@ -110,12 +122,15 @@ export default function PaymentPage() {
                 endDate: mainProduct?.endDate || new Date().toISOString().split('T')[0]
             });
 
-            // ApiResponse Wrapper 없이 직접 오므로 response.data가 OrderResponse임.
-            const serverOrder = response.data;
+            // ApiResponse Wrapper 처리
+            // response.data는 { resultCode: "SUCCESS", message: "...", data: { ...OrderResponse } } 형태임
+            const apiResponse = response.data as any; // 타입 단언 안전하게 (또는 interface 정의 필요)
+
+            // 데이터 추출 (ApiResponse 구조에 맞춤)
+            const serverOrder = apiResponse.data || apiResponse; // 혹시 모를 하위 호환성 (또는 직접 OrderResponse인 경우)
+
             const orderNo = serverOrder.orderNo;
-            // 백엔드 OrderResponse는 totalAmount 필드를 가질 가능성이 높음 (DTO 확인 후 적용)
-            // 안전하게 둘 다 체크
-            const totalAmount = serverOrder.price || serverOrder.totalAmount;
+            const totalAmount = serverOrder.price || serverOrder.totalAmount || 0;
 
 
 
@@ -149,6 +164,8 @@ export default function PaymentPage() {
 
         } catch (error: unknown) {
             console.error("주문 생성 실패:", error);
+            setIsLoading(false); // Reset loading on error
+            isSubmitting.current = false; // Release lock on error
             const err = error as ApiError;
             // 에러 메시지 상세 추출
             let errorMsg = '서버와의 통신 중 오류가 발생했습니다.';
@@ -190,7 +207,7 @@ export default function PaymentPage() {
                     tickets={[
                         { orderNumber: completedOrder.id, amount: completedOrder.amount }
                     ]}
-                    onViewOrders={() => router.push('/orders/guest')}
+                    onViewOrders={() => router.push('/orders')}
                 />
             </div>
         );
@@ -210,9 +227,12 @@ export default function PaymentPage() {
                         <div
                             className={styles.btnSolid}
                             onClick={handleOrder}
-                            style={{ cursor: 'pointer' }}
+                            style={{
+                                cursor: isLoading ? 'not-allowed' : 'pointer',
+                                opacity: isLoading ? 0.7 : 1
+                            }}
                         >
-                            결제 진행
+                            {isLoading ? '처리 중...' : '결제 진행'}
                         </div>
                     </div>
                 </div>

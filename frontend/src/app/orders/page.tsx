@@ -88,11 +88,19 @@ export default function OrdersPage() {
                     <span className={styles.emptyIcon}>🎫</span>
                     <Text typography="heading4" style={{ fontWeight: 700 }}>아직 예약된 내역이 없습니다.</Text>
                     <Text typography="body1" style={{ color: '#666' }}>지금 바로 멋진 여행 상품을 찾아보세요!</Text>
-                    <Link href="/search" style={{ textDecoration: 'none', marginTop: '10px' }}>
-                        <Button colorPalette="primary" size="lg" style={{ borderRadius: '12px', padding: '0 40px' }}>
-                            여행 상품 탐색하기
-                        </Button>
-                    </Link>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center', marginTop: '20px' }}>
+                        <Link href="/search" style={{ textDecoration: 'none' }}>
+                            <Button colorPalette="primary" size="lg" style={{ borderRadius: '12px', padding: '0 40px', width: '280px' }}>
+                                여행 상품 탐색하기
+                            </Button>
+                        </Link>
+                        <Link href="/orders/guest" style={{ textDecoration: 'none' }}>
+                            <Button colorPalette="secondary" variant="outline" size="lg" style={{ borderRadius: '12px', padding: '0 40px', width: '280px' }}>
+                                비회원 주문 조회하기
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
             </div>
         );

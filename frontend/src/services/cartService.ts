@@ -118,13 +118,13 @@ export const cartService = {
         targetOrder.status = newStatus;
         localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 
-        // 백엔드 동기화 (신규 CRM 경로 반영)
-        await apiClient.post('/api/v1/orders', {
-          orderNo: targetOrder.orderId,
-          customerName: targetOrder.customerInfo?.name,
-          customerEmail: targetOrder.customerInfo?.email,
-          status: targetOrder.status
-        });
+        // 백엔드 동기화 (신규 CRM 경로 반영 - 취소 전용 엔드포인트 호출)
+        if (newStatus === 'canceled') {
+          await apiClient.post(`/api/v1/orders/${targetOrder.orderId}/cancel`, {});
+        } else {
+          // 상태 복구 등의 경우 (현재 로직상으로는 취소만 있음)
+          // 필요시 다른 엔드포인트 사용 or 구현
+        }
       }
     } catch (error) {
       console.error("주문 상태 업데이트 실패:", error);
@@ -143,8 +143,8 @@ export const cartService = {
       const filteredOrders = orders.filter((order) => order.orderId !== orderId);
       localStorage.setItem(ORDERS_KEY, JSON.stringify(filteredOrders));
 
-      // 백엔드 삭제 요청 (필요 시 구현, 현재는 경로만 맞춤)
-      // await apiClient.delete(`/api/v1/orders/${orderId}`);
+      // 백엔드 삭제 요청 (Soft Delete)
+      await apiClient.post(`/api/v1/orders/${orderId}/delete`, {});
     } catch (error) {
       console.error("주문 삭제 실패:", error);
     }

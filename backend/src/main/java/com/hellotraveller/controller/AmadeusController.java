@@ -7,7 +7,7 @@ import com.amadeus.exceptions.ResponseException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import jakarta.annotation.PostConstruct; // Spring Boot 3+ uses Jakarta
+import jakarta.annotation.PostConstruct;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,21 +49,26 @@ public class AmadeusController {
     }
 
     // 서버 시작 시 캐시 워밍 (비동기 처리)
+    // 서버 시작 시 캐시 워밍 (비동기 처리) - Disabled as per user request to use local JSON only
     @PostConstruct
     public void initCache() {
-        new Thread(() -> {
-            System.out.println("========== [Cache Warming] Started ==========");
-            for (double[] city : PROMO_CITIES) {
-                try {
-                    System.out.println("Fetching data for city coords: " + Arrays.toString(city));
-                    getTours(city[0], city[1]); // 캐시 적재
-                    Thread.sleep(500); // API Rate Limit 방지 딜레이
-                } catch (Exception e) {
-                    System.err.println("Failed to warm cache for " + Arrays.toString(city) + ": " + e.getMessage());
-                }
-            }
-            System.out.println("========== [Cache Warming] Completed ==========");
-        }).start();
+        /*
+         * new Thread(() -> {
+         * System.out.println("========== [Cache Warming] Started ==========");
+         * for (double[] city : PROMO_CITIES) {
+         * try {
+         * System.out.println("Fetching data for city coords: " +
+         * Arrays.toString(city));
+         * getTours(city[0], city[1]); // 캐시 적재
+         * Thread.sleep(500); // API Rate Limit 방지 딜레이
+         * } catch (Exception e) {
+         * System.err.println("Failed to warm cache for " + Arrays.toString(city) + ": "
+         * + e.getMessage());
+         * }
+         * }
+         * System.out.println("========== [Cache Warming] Completed ==========");
+         * }).start();
+         */
     }
 
     @GetMapping("/external/tours")
@@ -85,11 +90,16 @@ public class AmadeusController {
             }
         }
 
-        System.out.println("Cache Miss. Fetching from Amadeus API for: " + cacheKey);
+        System.out.println("Cache Miss. Fetching from Amadeus API (By Square) for: " + cacheKey);
 
-        // 2. 외부 API 호출
-        Activity[] activities = amadeus.shopping.activities.get(
-                Params.with("latitude", lat).and("longitude", lon).and("radius", 20));
+        // 2. 외부 API 호출 (By Square - Quota 우회)
+        // 0.1 degree is roughly 11km, so +/- 0.1 creates a ~20km box
+        double boxSize = 0.1;
+        Activity[] activities = amadeus.shopping.activities.bySquare.get(
+                Params.with("north", lat + boxSize)
+                        .and("south", lat - boxSize)
+                        .and("east", lon + boxSize)
+                        .and("west", lon - boxSize));
 
         if (activities == null)
             return new ArrayList<>();
@@ -127,45 +137,46 @@ public class AmadeusController {
                         }
                         item.put("price", price);
 
+                        // 3.1. 스마트 옵션 매칭 (키워드 분석)
+                        List<String> matchedOptions = new ArrayList<>();
+                        String descriptionLower = (item.get("description").toString() + " " + activity.getName())
+                                .toLowerCase();
+
+                        // 키워드 매핑 (Amadeus 설명 -> Frontend 옵션명)
+                        Map<String, String> keywordMap = new HashMap<>();
+                        keywordMap.put("guide", "현지 가이드 동행");
+                        keywordMap.put("escort", "현지 가이드 동행");
+                        keywordMap.put("transport", "교통비 포함");
+                        keywordMap.put("transfer", "교통비 포함");
+                        keywordMap.put("pickup", "교통비 포함");
+                        keywordMap.put("boat", "전용 보트 서비스");
+                        keywordMap.put("cruise", "전용 보트 서비스");
+                        keywordMap.put("sailing", "전용 보트 서비스");
+                        keywordMap.put("lunch", "중식 및 생수 제공");
+                        keywordMap.put("dinner", "중식 및 생수 제공");
+                        keywordMap.put("meal", "중식 및 생수 제공");
+                        keywordMap.put("food", "중식 및 생수 제공");
+                        keywordMap.put("ticket", "입장료 전부 포함");
+                        keywordMap.put("entrance", "입장료 전부 포함");
+                        keywordMap.put("admission", "입장료 전부 포함");
+                        keywordMap.put("insurance", "여행자 보험");
+
+                        for (String keyword : keywordMap.keySet()) {
+                            if (descriptionLower.contains(keyword)) {
+                                String optionName = keywordMap.get(keyword);
+                                if (!matchedOptions.contains(optionName)) {
+                                    matchedOptions.add(optionName);
+                                }
+                            }
+                        }
+                        item.put("matchedOptions", matchedOptions);
+
                     } catch (Exception e) {
                         System.err.println("아이템 처리 중 오류 발생: " + e.getMessage());
                     }
-                    // 3.1. 스마트 옵션 매칭 (키워드 분석)
-                    List<String> matchedOptions = new ArrayList<>();
-                    String descriptionLower = (item.get("description").toString() + " " + activity.getName())
-                            .toLowerCase();
-
-                    // 키워드 매핑 (Amadeus 설명 -> Frontend 옵션명)
-                    Map<String, String> keywordMap = new HashMap<>();
-                    keywordMap.put("guide", "현지 가이드 동행");
-                    keywordMap.put("escort", "현지 가이드 동행");
-                    keywordMap.put("transport", "교통비 포함");
-                    keywordMap.put("transfer", "교통비 포함");
-                    keywordMap.put("pickup", "교통비 포함");
-                    keywordMap.put("boat", "전용 보트 서비스");
-                    keywordMap.put("cruise", "전용 보트 서비스");
-                    keywordMap.put("sailing", "전용 보트 서비스");
-                    keywordMap.put("lunch", "중식 및 생수 제공");
-                    keywordMap.put("dinner", "중식 및 생수 제공");
-                    keywordMap.put("meal", "중식 및 생수 제공");
-                    keywordMap.put("food", "중식 및 생수 제공");
-                    keywordMap.put("ticket", "입장료 전부 포함");
-                    keywordMap.put("entrance", "입장료 전부 포함");
-                    keywordMap.put("admission", "입장료 전부 포함");
-                    keywordMap.put("insurance", "여행자 보험");
-
-                    for (String keyword : keywordMap.keySet()) {
-                        if (descriptionLower.contains(keyword)) {
-                            String optionName = keywordMap.get(keyword);
-                            if (!matchedOptions.contains(optionName)) {
-                                matchedOptions.add(optionName);
-                            }
-                        }
-                    }
-                    item.put("matchedOptions", matchedOptions);
-
                     return item;
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
 
         // 4. 데이터 섞기 및 15개 제한 (네트워크 전송량 최적화)
         Collections.shuffle(result);

@@ -42,7 +42,7 @@ export default function GlobalHeader() {
     // 공통 내비게이션 구성 함수
     const getGlobalLinks = () => [
         { label: '여행 상품', href: '/search' },
-        ...(hasOrders ? [{ label: '내 예약', href: '/orders' }] : []),
+        { label: '내 예약', href: '/orders' },
         { label: '장바구니', href: '/payment' },
         { label: '문의하기' },
         // 로그인 상태에 따라 버튼 분기

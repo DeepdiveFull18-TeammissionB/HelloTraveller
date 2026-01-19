@@ -20,6 +20,8 @@ const ProductService = {
      * 2. 실패 시 로컬 JSON 데이터 Fallback
      */
     fetchTourProducts: async (params?: FetchParams): Promise<ProductItem[]> => {
+        // Temporarily disabled external API call as per user request
+        /*
         try {
             // 1. 외부 API 시도
             const externalResponse = await apiClient.get('/api/external/tours', {
@@ -33,10 +35,11 @@ const ProductService = {
             throw new Error("No external data found");
         } catch (e) {
             console.warn("Falling back to Local Data due to:", e);
-            // 2. 로컬 데이터 Fallback
-            const localResponse = await apiClient.get('/api/tours', { params });
-            return localResponse.data;
-        }
+        */
+        // 2. 로컬 데이터 Fallback
+        const localResponse = await apiClient.get('/api/tours', { params });
+        return localResponse.data;
+        // }
     }
 };
 

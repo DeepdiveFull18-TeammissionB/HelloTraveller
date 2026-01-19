@@ -23,9 +23,7 @@ services:
       - dynamodb-local
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: hellodockerj/hellotraveller-backend:v2
     container_name: backend-server
     ports:
       - "4000:4000"
@@ -34,11 +32,7 @@ services:
     restart: always
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: http://localhost:4000
+    image: hellodockerj/hellotraveller-frontend:v2
     container_name: frontend-server
     ports:
       - "3000:3000"

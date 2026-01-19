@@ -22,6 +22,12 @@ public class DynamoDBConfig {
 
         DynamoDbClientBuilder builder = DynamoDbClient.builder()
                 .region(Region.of(region));
+        System.out.println("DynamoDB Config - Region: " + region);
+        if (accessKey == null || secretKey == null) {
+            System.err.println("DynamoDB Config - WARNING: AWS Credentials not found in .env");
+        } else {
+            System.out.println("DynamoDB Config - AWS Credentials found.");
+        }
 
         String endpoint = dotenv.get("DYNAMODB_ENDPOINT");
         if (endpoint != null && !endpoint.isEmpty()) {
