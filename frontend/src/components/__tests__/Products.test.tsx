@@ -13,6 +13,16 @@ jest.mock('swiper/modules', () => ({
 
 jest.mock('swiper/css', () => ({}));
 
+jest.mock('../../services/apiClient', () => ({
+    to: (url: string) => url,
+    BASE_URL: 'http://localhost:4000',
+    default: {
+        get: jest.fn(),
+        post: jest.fn(),
+    }
+}));
+
+
 describe('Products Component', () => {
     const mockUpdateItemCount = jest.fn()
 
