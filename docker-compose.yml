@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   dynamodb-local:
     command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
@@ -23,7 +23,9 @@ services:
       - dynamodb-local
 
   backend:
-    image: hellodockerj/hellotraveller-backend:v1
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: backend-server
     ports:
       - "4000:4000"
@@ -32,7 +34,11 @@ services:
     restart: always
 
   frontend:
-    image: hellodockerj/hellotraveller-frontend:v1
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:4000
     container_name: frontend-server
     ports:
       - "3000:3000"
