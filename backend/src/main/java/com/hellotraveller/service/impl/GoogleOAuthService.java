@@ -9,7 +9,7 @@ import com.hellotraveller.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity; // 이거 다시 추가!
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +20,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Base64;
-import java.util.UUID;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,12 +27,12 @@ public class GoogleOAuthService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ObjectMapper objectMapper;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${google.client-id}")
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
 
-    @Value("${google.client-secret}")
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String clientSecret;
 
     @Transactional
@@ -50,7 +47,7 @@ public class GoogleOAuthService {
     }
 
     private String getGoogleIdToken(String code, String redirectUri) {
-        RestTemplate restTemplate = new RestTemplate();
+        String tokenUrl = "https://oauth2.googleapis.com/token";
 
         // 구글은 Body에 JSON으로 보내거나 Form-UrlEncoded 둘 다 가능하지만, Form 형식을 사용
         HttpHeaders headers = new HttpHeaders();
@@ -65,38 +62,35 @@ public class GoogleOAuthService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "https://oauth2.googleapis.com/token",
-                request,
-                String.class);
-
         try {
+            ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);
+            ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
             return jsonNode.get("id_token").asText();
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Google token parsing failed", e);
+            throw new RuntimeException("Google ID Token 파싱 실패", e);
         }
     }
 
     private GoogleUserInfo decodeIdToken(String idToken) {
-        String[] chunks = idToken.split("\\.");
-        Base64.Decoder decoder = Base64.getUrlDecoder();
-        String payload = new String(decoder.decode(chunks[1]));
+        // 실제 운영 환경에서는 서명 검증이 필요하지만, 여기서는 페이로드 디코딩만 수행
+        // JWT는 Header.Payload.Signature 구조
+        String[] parts = idToken.split("\\.");
+        if (parts.length < 2) {
+            throw new RuntimeException("Invalid ID Token");
+        }
 
+        String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            JsonNode payloadNode = objectMapper.readTree(payload);
-            String sub = payloadNode.get("sub").asText();
-            String email = payloadNode.get("email").asText();
-            String name = payloadNode.has("name") ? payloadNode.get("name").asText() : "Google User";
-
-            return new GoogleUserInfo(sub, email, name);
+            return objectMapper.readValue(payload, GoogleUserInfo.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("ID Token decoding failed", e);
+            throw new RuntimeException("ID Token 디코딩 실패", e);
         }
     }
 
     private Member registerGoogleUser(GoogleUserInfo userInfo) {
-        String password = UUID.randomUUID().toString();
+        String password = userInfo.getId();
         String encodedPassword = passwordEncoder.encode(password);
 
         Member newMember = Member.builder()
@@ -107,7 +101,9 @@ public class GoogleOAuthService {
                 .grade(Member.Grade.BASIC)
                 .build();
 
-        return memberRepository.save(newMember);
+        @SuppressWarnings("null")
+        Member savedMember = memberRepository.save(newMember);
+        return savedMember;
     }
 
     @lombok.AllArgsConstructor

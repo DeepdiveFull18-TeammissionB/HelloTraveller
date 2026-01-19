@@ -4,8 +4,10 @@ import com.hellotraveller.entity.Member;
 import com.hellotraveller.dto.MemberLoginRequest;
 import com.hellotraveller.dto.MemberResponse;
 import com.hellotraveller.dto.MemberSignupRequest;
+import com.hellotraveller.common.exception.DuplicateEmailException;
 import com.hellotraveller.repository.MemberRepository;
 import com.hellotraveller.service.MemberService;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +26,7 @@ public class MemberServiceImpl implements MemberService {
     public MemberResponse signUp(MemberSignupRequest request) {
         // 1. 이메일 중복 검사
         if (memberRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("이미 사용 중인 이메일입니다."); // TODO: Custom Exception
+            throw new DuplicateEmailException("이미 사용 중인 이메일입니다.");
         }
 
         // 2. 비밀번호 암호화
@@ -40,6 +42,7 @@ public class MemberServiceImpl implements MemberService {
                 .build();
 
         // 4. 저장
+        @SuppressWarnings("null")
         Member savedMember = memberRepository.save(member);
 
         return new MemberResponse(savedMember);
@@ -61,7 +64,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberResponse getMyInfo(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+        Member member = memberRepository.findById(Objects.requireNonNull(memberId))
                 .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
         return new MemberResponse(member);
     }
@@ -69,7 +72,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void withdraw(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+        Member member = memberRepository.findById(Objects.requireNonNull(memberId))
                 .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
 
         member.withdraw(); // Soft Delete

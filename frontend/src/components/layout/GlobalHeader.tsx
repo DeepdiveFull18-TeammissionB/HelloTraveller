@@ -4,11 +4,9 @@ import Header from './Header';
 import Navbar, { NavbarProps } from './Navbar';
 import styles from '../common/SharedStyles.module.css';
 import { usePathname } from 'next/navigation';
-import { cartService } from '../../services/cartService';
 
 export default function GlobalHeader() {
     const pathname = usePathname();
-    const [hasOrders, setHasOrders] = React.useState(false); // 복구됨
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
     const [userName, setUserName] = React.useState('');
 
@@ -20,10 +18,6 @@ export default function GlobalHeader() {
             const name = sessionStorage.getItem('name') || '';
             setIsLoggedIn(loggedIn);
             setUserName(name);
-
-            // 장바구니 체크
-            const orders = cartService.getOrders();
-            setHasOrders(orders.length > 0);
         };
 
         checkStatus();

@@ -24,19 +24,6 @@ public class AmadeusController {
     private final Map<String, CacheEntry> tourCache = new ConcurrentHashMap<>();
     private static final long CACHE_TTL = 3600000; // 1시간 (밀리초)
 
-    // 주요 도시 리스트 (Cache Warming용)
-    private static final List<double[]> PROMO_CITIES = Arrays.asList(
-            new double[] { 37.5665, 126.9780 }, // Seoul
-            new double[] { 41.3851, 2.1734 }, // Barcelona
-            new double[] { 48.8566, 2.3522 }, // Paris
-            new double[] { 51.5074, -0.1278 }, // London
-            new double[] { 40.7128, -74.0060 }, // New York
-            new double[] { 13.7563, 100.5018 }, // Bangkok
-            new double[] { 34.6937, 135.5023 }, // Osaka
-            new double[] { 41.9028, 12.4964 }, // Rome
-            new double[] { 35.6762, 139.6503 } // Tokyo
-    );
-
     // 캐시 엔트리 클래스
     private static class CacheEntry {
         List<Map<String, Object>> data;

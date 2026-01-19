@@ -66,6 +66,7 @@ public class OrderService {
                 .guestPhone(request.getCustomerPhone())
                 .build();
 
+        @SuppressWarnings("null")
         Order savedOrder = orderRepository.save(order);
 
         // 2. Save to DynamoDB (Remote Persistence)

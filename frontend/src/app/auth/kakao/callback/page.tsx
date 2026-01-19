@@ -10,13 +10,10 @@ function KakaoCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const code = searchParams.get('code');
-    const [status, setStatus] = useState('카카오 로그인 중...');
+    const [status, setStatus] = useState(code ? '카카오 로그인 중...' : '인증 코드가 없습니다.');
 
     useEffect(() => {
-        if (!code) {
-            setStatus('인증 코드가 없습니다.');
-            return;
-        }
+        if (!code) return;
 
         const loginWithKakao = async () => {
             try {
@@ -48,7 +45,6 @@ function KakaoCallbackContent() {
         };
 
         loginWithKakao();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [code, router]);
 
     return (

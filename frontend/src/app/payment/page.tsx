@@ -15,11 +15,24 @@ import { showAlert } from '../../components/common/AlertPortal';
 import { useRouter } from 'next/navigation'; // useRouter 추가
 import { getRouteInfo } from '../../services/airportService';
 
-type PaymentStep = 'cart' | 'processing' | 'completed'; // processing 단계 추가
+interface ServerOrderData {
+    orderNo: string;
+    totalAmount: number;
+    price?: number;
+    status: string;
+    productName: string;
+    [key: string]: unknown; // fallback for extra fields from backend
+}
 
+interface ApiResponse {
+    resultCode: string;
+    message: string;
+    data: ServerOrderData;
+}
 
+type PaymentStep = 'cart' | 'processing' | 'completed';
 
-type ApiError = {
+interface ApiError {
     response?: {
         data?: {
             message?: string;
@@ -27,7 +40,8 @@ type ApiError = {
         };
         status?: number;
     };
-};
+    message?: string;
+}
 
 export default function PaymentPage() {
     const router = useRouter();
@@ -35,6 +49,8 @@ export default function PaymentPage() {
     const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [completedOrder, setCompletedOrder] = useState<{ id: string, amount: number, dDay: number } | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const isSubmitting = React.useRef(false);
 
     const context = useContext(OrderContext);
 
@@ -51,10 +67,6 @@ export default function PaymentPage() {
     if (!context) return null;
 
     const [orderData, updateItemCount, resetCart, removeItem] = context;
-
-    const [isLoading, setIsLoading] = useState(false);
-
-    const isSubmitting = React.useRef(false);
 
     const handleOrder = async () => {
         if (isSubmitting.current) return; // Immediate block using Ref
@@ -124,13 +136,13 @@ export default function PaymentPage() {
 
             // ApiResponse Wrapper 처리
             // response.data는 { resultCode: "SUCCESS", message: "...", data: { ...OrderResponse } } 형태임
-            const apiResponse = response.data as any; // 타입 단언 안전하게 (또는 interface 정의 필요)
+            const apiResponse = response.data as ApiResponse;
 
             // 데이터 추출 (ApiResponse 구조에 맞춤)
-            const serverOrder = apiResponse.data || apiResponse; // 혹시 모를 하위 호환성 (또는 직접 OrderResponse인 경우)
+            const serverOrder = apiResponse.data;
 
             const orderNo = serverOrder.orderNo;
-            const totalAmount = serverOrder.price || serverOrder.totalAmount || 0;
+            const totalAmount = serverOrder.totalAmount || serverOrder.price || 0;
 
 
 

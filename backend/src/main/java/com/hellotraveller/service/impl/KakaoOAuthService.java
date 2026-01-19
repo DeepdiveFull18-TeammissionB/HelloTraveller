@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hellotraveller.entity.Member;
 import com.hellotraveller.dto.MemberResponse;
 import com.hellotraveller.repository.MemberRepository;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,7 +70,7 @@ public class KakaoOAuthService {
 
         ResponseEntity<String> response = restTemplate.exchange(
                 "https://kauth.kakao.com/oauth/token",
-                HttpMethod.POST,
+                Objects.requireNonNull(HttpMethod.POST),
                 kakaoTokenRequest,
                 String.class);
 
@@ -114,7 +115,9 @@ public class KakaoOAuthService {
                 .grade(Member.Grade.BASIC)
                 .build();
 
-        return memberRepository.save(newMember);
+        @SuppressWarnings("null")
+        Member savedMember = memberRepository.save(newMember);
+        return savedMember;
     }
 
     // 내부 클래스 (DTO)

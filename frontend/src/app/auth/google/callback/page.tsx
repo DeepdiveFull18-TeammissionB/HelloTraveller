@@ -17,13 +17,10 @@ function GoogleCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const code = searchParams.get('code');
-    const [status, setStatus] = useState('구글 로그인 중...');
+    const [status, setStatus] = useState(code ? '구글 로그인 중...' : '인증 코드가 없습니다.');
 
     useEffect(() => {
-        if (!code) {
-            setStatus('인증 코드가 없습니다.');
-            return;
-        }
+        if (!code) return;
 
         const loginWithGoogle = async () => {
             try {
@@ -62,7 +59,6 @@ function GoogleCallbackContent() {
         };
 
         loginWithGoogle();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [code, router]);
 
     return (
