@@ -6,7 +6,7 @@ import apiClient from '@/services/apiClient';
 
 
 
-export default function KakaoCallbackPage() {
+function KakaoCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const code = searchParams.get('code');
@@ -49,7 +49,7 @@ export default function KakaoCallbackPage() {
 
         loginWithKakao();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [code]);
+    }, [code, router]);
 
     return (
         <div style={{
@@ -62,5 +62,13 @@ export default function KakaoCallbackPage() {
             <h2>{status}</h2>
             <div style={{ marginTop: '20px' }}>잠시만 기다려주세요...</div>
         </div>
+    );
+}
+
+export default function KakaoCallbackPage() {
+    return (
+        <React.Suspense fallback={<div>Loading...</div>}>
+            <KakaoCallbackContent />
+        </React.Suspense>
     );
 }

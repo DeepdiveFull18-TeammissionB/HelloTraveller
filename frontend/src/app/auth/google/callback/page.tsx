@@ -13,7 +13,7 @@ type ApiError = {
     message?: string;
 };
 
-export default function GoogleCallbackPage() {
+function GoogleCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const code = searchParams.get('code');
@@ -63,7 +63,7 @@ export default function GoogleCallbackPage() {
 
         loginWithGoogle();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [code]);
+    }, [code, router]);
 
     return (
         <div style={{
@@ -76,5 +76,13 @@ export default function GoogleCallbackPage() {
             <h2>{status}</h2>
             <div style={{ marginTop: '20px' }}>잠시만 기다려주세요...</div>
         </div>
+    );
+}
+
+export default function GoogleCallbackPage() {
+    return (
+        <React.Suspense fallback={<div>Loading...</div>}>
+            <GoogleCallbackContent />
+        </React.Suspense>
     );
 }
