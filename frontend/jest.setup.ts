@@ -21,11 +21,11 @@ jest.mock('axios', () => ({
 
 jest.mock('next/image', () => ({
     __esModule: true,
-    default: (props: any) => {
-        // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    default: (props: React.ComponentProps<'img'>) => {
         return React.createElement('img', props);
     },
 }));
+
 
 
 
