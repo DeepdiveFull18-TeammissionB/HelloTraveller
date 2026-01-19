@@ -96,7 +96,7 @@ public class MemberController {
 
     @GetMapping("/members/me")
     public ApiResponse<MemberResponse> getMyInfo(
-            @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) MemberResponse loginMember) {
+            @io.swagger.v3.oas.annotations.Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) MemberResponse loginMember) {
         if (loginMember == null) {
             throw new RuntimeException("로그인이 필요한 서비스입니다."); // 401
         }
@@ -108,7 +108,7 @@ public class MemberController {
 
     @DeleteMapping("/members/me")
     public ApiResponse<Void> withdraw(
-            @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) MemberResponse loginMember,
+            @io.swagger.v3.oas.annotations.Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false) MemberResponse loginMember,
             HttpServletRequest request) {
         if (loginMember == null) {
             throw new RuntimeException("로그인이 필요한 서비스입니다.");

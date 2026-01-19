@@ -20,6 +20,7 @@ public class SecurityConfig {
                 // CorsConfig.java에서 처리하므로 여기서의 설정은 비활성화하거나 기본값 사용
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().permitAll());
         return http.build();
     }
