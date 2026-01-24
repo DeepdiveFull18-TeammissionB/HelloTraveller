@@ -2,13 +2,13 @@
   "countries": [
     {
       "name": "Switzerland",
-      "imagePath": "/images/switzerland.jpeg",
+      "imagePath": "/images/switzerland.jpg",
       "description": "Amazing Mountain and Hiking nature",
       "price": 3500000
     },
     {
       "name": "Bali",
-      "imagePath": "/images/bali.jpeg",
+      "imagePath": "/images/bali.jpg",
       "description": "Beautiful Beach and Ocean sea",
       "price": 1500000
     },

@@ -104,6 +104,15 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- 서버배포 시 주석해제 -->
+		<!-- 
+		<dependency>
+			<groupId>com.oracle.database.jdbc</groupId>
+			<artifactId>ojdbc11</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		-->
+
 		<!-- Security -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

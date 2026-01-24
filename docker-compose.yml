@@ -23,16 +23,18 @@ services:
       - dynamodb-local
 
   backend:
-    image: hellodockerj/hellotraveller-backend:v2
+    image: hellodockerj/hellotraveller-backend:v3
     container_name: backend-server
     ports:
       - "4000:4000"
     env_file:
       - ./backend/.env
     restart: always
+    volumes:
+      - ./backend/images:/app/static/images
 
   frontend:
-    image: hellodockerj/hellotraveller-frontend:v2
+    image: hellodockerj/hellotraveller-frontend:v3
     container_name: frontend-server
     ports:
       - "3000:3000"

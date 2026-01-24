@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
 
+    // Service implementation for Member related operations
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 

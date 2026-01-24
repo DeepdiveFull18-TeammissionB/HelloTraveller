@@ -37,3 +37,9 @@ server_restore_*.log
 
 # Security
 .env
+
+# Docker image export files
+*.tar
+
+# Docker image export files
+nginx.conf

@@ -49,3 +49,7 @@ next-env.d.ts
 
 # Local DynamoDB Data
 docker/dynamodblocaltest/
+ssl/
+
+# Nginx configurations
+*.conf
